@@ -371,6 +371,10 @@ button {
   gap: 16px;
 }
 
+.is-hidden {
+  display: none;
+}
+
 .workspace.with-inspector {
   grid-template-columns: minmax(0, 1fr) 360px;
   align-items: start;

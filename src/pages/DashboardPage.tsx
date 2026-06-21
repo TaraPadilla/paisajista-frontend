@@ -71,30 +71,6 @@ export function DashboardPage({ selectedPlant, onSelectPlant }: DashboardPagePro
         </div>
       </section>
 
-      <section className="panel design-panel">
-        <div className="panel-header">
-          <div>
-            <h2>Tablero de diseño</h2>
-            <p>Mock visual para plano 2D, escala de copa y vista en corte.</p>
-          </div>
-          <span className="segmented"><b>2D</b><span>3D</span></span>
-        </div>
-        <div className="plan-board">
-          <span className="pool" />
-          <span className="house" />
-          <span className="plan-plant violet" />
-          <span className="plan-plant wine" />
-          <span className="plan-plant green" />
-          <span className="path" />
-          <small>0 - 1.5 m</small>
-        </div>
-        <div className="elevation-strip">
-          <span className="front-plant wine" />
-          <span className="front-plant violet" />
-          <span className="person-scale" />
-          <span className="front-plant green large" />
-        </div>
-      </section>
     </div>
   )
 }
