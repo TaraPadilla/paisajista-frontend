@@ -5,9 +5,10 @@ interface SidebarProps {
   activeView: ViewId
   items: MenuItem[]
   onChangeView: (view: ViewId) => void
+  onClose: () => void
 }
 
-export function Sidebar({ activeView, items, onChangeView }: SidebarProps) {
+export function Sidebar({ activeView, items, onChangeView, onClose }: SidebarProps) {
   return (
     <aside className="sidebar" aria-label="Menú lateral">
       <div className="brand-card">
@@ -18,6 +19,9 @@ export function Sidebar({ activeView, items, onChangeView }: SidebarProps) {
           <strong>El Paisajista</strong>
           <span>Biblioteca técnica y diseño</span>
         </div>
+        <button className="sidebar-close-button" type="button" onClick={onClose} aria-label="Cerrar menú lateral">
+          ×
+        </button>
       </div>
 
       <nav className="side-nav">

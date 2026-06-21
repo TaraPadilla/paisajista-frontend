@@ -40,7 +40,25 @@ export function AppLayout({
       />
 
       <div className={useSidebar ? 'layout-body' : 'layout-body sidebar-closed'}>
-        {useSidebar && <Sidebar activeView={activeView} items={menuItems} onChangeView={onChangeView} />}
+        {!useSidebar && (
+          <button
+            className="sidebar-open-button"
+            type="button"
+            onClick={onToggleNavigation}
+            aria-label="Abrir menú lateral"
+            title="Abrir menú lateral"
+          >
+            ☰
+          </button>
+        )}
+        {useSidebar && (
+          <Sidebar
+            activeView={activeView}
+            items={menuItems}
+            onChangeView={onChangeView}
+            onClose={onToggleNavigation}
+          />
+        )}
         <main className="content-area">{children}</main>
       </div>
     </div>

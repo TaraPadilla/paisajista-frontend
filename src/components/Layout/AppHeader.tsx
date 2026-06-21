@@ -37,9 +37,14 @@ export function AppHeader({
       </label>
 
       <div className="header-actions">
-        <button className="icon-button nav-toggle-button" type="button" onClick={onToggleNavigation} title="Cambiar navegación">
+        <button
+          className="icon-button nav-toggle-button"
+          type="button"
+          onClick={onToggleNavigation}
+          title={useSidebar ? 'Ocultar menú lateral' : 'Mostrar menú lateral'}
+          aria-label={useSidebar ? 'Ocultar menú lateral' : 'Mostrar menú lateral'}
+        >
           <Icon name="layout" />
-          <span>{useSidebar ? 'Ocultar menú' : 'Mostrar menú'}</span>
         </button>
         <button className="icon-button ghost" type="button" title="Notificaciones">
           <Icon name="bell" />
