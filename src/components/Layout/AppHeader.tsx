@@ -54,9 +54,9 @@ export function AppHeader({
           Nuevo
         </button>
         <div className="user-chip">
-          <span>AP</span>
+          <span>GP</span>
           <div>
-            <strong>Alicia Pérez</strong>
+            <strong>Geronimo Parilla</strong>
             <small>Paisajista</small>
           </div>
         </div>

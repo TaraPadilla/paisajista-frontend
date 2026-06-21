@@ -80,17 +80,17 @@ button {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) minmax(360px, 560px) auto;
   align-items: center;
-  gap: 22px;
-  padding: 18px 24px;
+  gap: 16px;
+  padding: 10px 20px;
   background: rgba(248, 245, 239, .9);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(20px);
 }
 
 .header-title h1 {
-  margin: 3px 0 2px;
+  margin: 2px 0 1px;
   font-family: var(--font-serif);
-  font-size: 36px;
+  font-size: 30px;
   font-weight: 600;
   line-height: .98;
   letter-spacing: -.035em;
@@ -116,7 +116,7 @@ button {
 }
 
 .command-search {
-  height: 40px;
+  height: 36px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 253, 248, .86);
@@ -154,7 +154,7 @@ button {
 .primary-button,
 .secondary-button,
 .filter-row button {
-  min-height: 36px;
+  min-height: 34px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 253, 248, .9);
@@ -201,12 +201,12 @@ button {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 253, 248, .92);
-  padding: 7px 10px 7px 7px;
+  padding: 5px 9px 5px 5px;
 }
 
 .user-chip > span {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--green), #345f3d);
   color: #fff;
@@ -994,14 +994,4 @@ button {
   height: 82px;
   border-bottom: 8px solid #7b6d5d;
   position: relative;
-}
-
-@media (max-width: 1280px) {
-  .workspace.with-inspector {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .plant-inspector {
-    position: static;
-  }
 }
