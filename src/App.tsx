@@ -6,11 +6,19 @@ import { useMenuItems } from './hooks/useMenuItems'
 import { DashboardPage } from './pages/DashboardPage'
 import { PlantsPage } from './pages/PlantsPage'
 import { SimpleModulePage } from './pages/SimpleModulePage'
-import { VisualCatalogPage } from './pages/VisualCatalogPage'
 import type { Plant } from './types/plant'
 import type { ViewId } from './types/navigation'
 
-const moduleContent = {
+type SimpleModuleView = 'clients' | 'providers' | 'images' | 'settings'
+
+const moduleContent: Record<
+  SimpleModuleView,
+  {
+    title: string
+    description: string
+    cards: Array<{ title: string; body: string; meta: string }>
+  }
+> = {
   clients: {
     title: 'Gestión de clientes',
     description: 'Perfiles claros para proyectos, contactos, presupuestos y estado de obra.',
@@ -106,10 +114,6 @@ const titles: Record<ViewId, { title: string; subtitle: string }> = {
     title: 'Plantas',
     subtitle: 'Banco técnico de especies con filtros ambientales, morfológicos y estéticos.',
   },
-  'visual-catalog': {
-    title: 'Catálogo visual',
-    subtitle: 'Exploración premium por estilo, color, textura y temporada.',
-  },
   clients: {
     title: 'Clientes',
     subtitle: 'Relación comercial y contexto de proyectos de paisajismo.',
@@ -163,15 +167,11 @@ function App() {
       return <PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />
     }
 
-    if (activeView === 'visual-catalog') {
-      return <VisualCatalogPage onSelectPlant={handleSelectPlant} />
-    }
-
     const module = moduleContent[activeView]
     return <SimpleModulePage title={module.title} description={module.description} cards={module.cards} />
   }, [activeView, selectedPlant])
 
-  const showInspector = ['dashboard', 'plants', 'visual-catalog', 'images'].includes(activeView)
+  const showInspector = ['dashboard', 'plants', 'images'].includes(activeView)
 
   return (
     <AppLayout

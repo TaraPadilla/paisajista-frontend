@@ -14,12 +14,6 @@ export const useMenuItems = (): MenuItem[] => [
     icon: 'sprout',
   },
   {
-    id: 'visual-catalog',
-    label: 'Catálogo visual',
-    description: 'Exploración por estilo y color',
-    icon: 'gallery',
-  },
-  {
     id: 'clients',
     label: 'Clientes',
     description: 'Proyectos y contactos',

@@ -1,7 +1,6 @@
 export type ViewId =
   | 'dashboard'
   | 'plants'
-  | 'visual-catalog'
   | 'clients'
   | 'providers'
   | 'images'
