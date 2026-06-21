@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react'
+
 interface IconProps {
   name: string
   className?: string
 }
 
 export function Icon({ name, className = 'icon' }: IconProps) {
-  const paths: Record<string, JSX.Element> = {
+  const paths: Record<string, ReactNode> = {
     home: (
       <>
         <path d="m3 11 9-8 9 8" />

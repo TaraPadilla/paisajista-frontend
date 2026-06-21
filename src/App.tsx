@@ -1,121 +1,197 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useMemo, useState } from 'react'
+import { AppLayout } from './components/Layout/AppLayout'
+import { PlantInspector } from './components/PlantInspector'
+import { plants } from './data/mockData'
+import { useMenuItems } from './hooks/useMenuItems'
+import { DashboardPage } from './pages/DashboardPage'
+import { PlantsPage } from './pages/PlantsPage'
+import { SimpleModulePage } from './pages/SimpleModulePage'
+import { VisualCatalogPage } from './pages/VisualCatalogPage'
+import type { Plant } from './types/plant'
+import type { ViewId } from './types/navigation'
+
+const moduleContent = {
+  clients: {
+    title: 'Gestión de clientes',
+    description: 'Perfiles claros para proyectos, contactos, presupuestos y estado de obra.',
+    cards: [
+      {
+        title: 'Residencia Díaz',
+        body: 'Proyecto en ejecución con presupuesto separado por diseño, materiales y mano de obra.',
+        meta: 'En ejecución',
+      },
+      {
+        title: 'Hotel Costa Verde',
+        body: 'Necesita especies resistentes a viento, salinidad y bajo mantenimiento.',
+        meta: 'Visita pendiente',
+      },
+      {
+        title: 'Casa Los Álamos',
+        body: 'Jardín contemporáneo con plantas estructurales, gramíneas y floración violeta.',
+        meta: 'En diseño',
+      },
+    ],
+  },
+  providers: {
+    title: 'Gestión de proveedores',
+    description: 'Viveros, listas de precio, disponibilidad y especies asociadas.',
+    cards: [
+      {
+        title: 'Vivero Andino',
+        body: 'Especialista en formios, gramíneas y plantas rústicas para proyectos costeros.',
+        meta: '142 especies',
+      },
+      {
+        title: 'Plantas del Valle',
+        body: 'Buen stock para herbáceas, cubresuelos y floración estacional.',
+        meta: '98 especies',
+      },
+      {
+        title: 'Vivero del Sur',
+        body: 'Proveedor recomendado para nativas, praderas y paisajismo naturalista.',
+        meta: '76 especies',
+      },
+    ],
+  },
+  images: {
+    title: 'Administración de imágenes',
+    description: 'Carga separada de PNG cenital y PNG de corte para cada especie.',
+    cards: [
+      {
+        title: 'Vista en planta',
+        body: 'Silueta cenital escaneada desde acuarela para ubicar especies sobre el plano 2D.',
+        meta: '618 listas',
+      },
+      {
+        title: 'Vista en corte',
+        body: 'Alzado frontal para componer alturas, masas y niveles en cortes técnicos.',
+        meta: '402 listas',
+      },
+      {
+        title: 'Control de calidad',
+        body: 'Estados sugeridos: pendiente de escaneo, necesita recorte, listo para plano.',
+        meta: '14 pendientes',
+      },
+    ],
+  },
+  settings: {
+    title: 'Parámetros y catálogos',
+    description: 'Configuración de tipos, opciones y campos dinámicos para crecer por fases.',
+    cards: [
+      {
+        title: 'Catálogos',
+        body: 'Tipos de tercero, tipos de imagen, estilos, colores, estaciones y portes.',
+        meta: '42 valores',
+      },
+      {
+        title: 'Características',
+        body: 'Exposición solar, riego, heladas, suelo, altura, copa, floración y estilo.',
+        meta: '11 campos base',
+      },
+      {
+        title: 'Parámetros generales',
+        body: 'Unidades, moneda, reglas visuales, estados y porcentajes de contingencia.',
+        meta: 'Preparado para crecer',
+      },
+    ],
+  },
+}
+
+const titles: Record<ViewId, { title: string; subtitle: string }> = {
+  dashboard: {
+    title: 'Inicio',
+    subtitle: 'Vista diaria para plantas, proyectos, presupuestos e imágenes pendientes.',
+  },
+  plants: {
+    title: 'Plantas',
+    subtitle: 'Banco técnico de especies con filtros ambientales, morfológicos y estéticos.',
+  },
+  'visual-catalog': {
+    title: 'Catálogo visual',
+    subtitle: 'Exploración premium por estilo, color, textura y temporada.',
+  },
+  clients: {
+    title: 'Clientes',
+    subtitle: 'Relación comercial y contexto de proyectos de paisajismo.',
+  },
+  providers: {
+    title: 'Proveedores',
+    subtitle: 'Viveros, precios base y disponibilidad por especie.',
+  },
+  images: {
+    title: 'Imágenes',
+    subtitle: 'Gestión de vistas en planta y corte para diseño gráfico.',
+  },
+  settings: {
+    title: 'Parámetros',
+    subtitle: 'Catálogos y características dinámicas del sistema.',
+  },
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const menuItems = useMenuItems()
+  const [activeView, setActiveView] = useState<ViewId>('dashboard')
+  const [useSidebar, setUseSidebar] = useState(true)
+  const [searchValue, setSearchValue] = useState('')
+  const [selectedPlant, setSelectedPlant] = useState<Plant>(plants[1])
+  const [isInspectorOpen, setIsInspectorOpen] = useState(true)
+
+  const visibleTitle = titles[activeView]
+
+  const handleSelectPlant = (plant: Plant) => {
+    setSelectedPlant(plant)
+    setIsInspectorOpen(true)
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value)
+    const foundPlant = plants.find((plant) =>
+      `${plant.scientificName} ${plant.commonName} ${plant.style}`.toLowerCase().includes(value.toLowerCase()),
+    )
+
+    if (foundPlant) {
+      handleSelectPlant(foundPlant)
+    }
+  }
+
+  const mainContent = useMemo(() => {
+    if (activeView === 'dashboard') {
+      return <DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />
+    }
+
+    if (activeView === 'plants') {
+      return <PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />
+    }
+
+    if (activeView === 'visual-catalog') {
+      return <VisualCatalogPage onSelectPlant={handleSelectPlant} />
+    }
+
+    const module = moduleContent[activeView]
+    return <SimpleModulePage title={module.title} description={module.description} cards={module.cards} />
+  }, [activeView, selectedPlant])
+
+  const showInspector = ['dashboard', 'plants', 'visual-catalog', 'images'].includes(activeView)
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <AppLayout
+      activeView={activeView}
+      title={visibleTitle.title}
+      subtitle={visibleTitle.subtitle}
+      menuItems={menuItems}
+      useSidebar={useSidebar}
+      searchValue={searchValue}
+      onSearchChange={handleSearchChange}
+      onChangeView={setActiveView}
+      onToggleNavigation={() => setUseSidebar((current) => !current)}
+    >
+      <div className={showInspector && isInspectorOpen ? 'workspace with-inspector' : 'workspace'}>
+        {mainContent}
+        {showInspector && (
+          <PlantInspector plant={selectedPlant} isOpen={isInspectorOpen} onClose={() => setIsInspectorOpen(false)} />
+        )}
+      </div>
+    </AppLayout>
   )
 }
 
