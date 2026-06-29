@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
-import { PlantInspector } from './components/PlantInspector'
+import { PlantInspector } from './components/plantas/PlantInspector'
 import { plants } from './data/mockData'
 import { useMenuItems } from './hooks/useMenuItems'
 import { CaracteristicasPage } from './pages/CaracteristicasPage'

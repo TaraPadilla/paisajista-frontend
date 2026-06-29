@@ -1,4 +1,4 @@
-import type { Plant } from '../types/plant'
+import type { Plant } from '../../types/plant'
 
 interface PlantInspectorProps {
   plant: Plant

@@ -49,10 +49,6 @@ export function AppHeader({
         <button className="icon-button ghost" type="button" title="Notificaciones">
           <Icon name="bell" />
         </button>
-        <button className="primary-button" type="button">
-          <Icon name="plus" />
-          Nuevo
-        </button>
         <div className="user-chip">
           <span>GP</span>
           <div>
