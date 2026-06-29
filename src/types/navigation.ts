@@ -5,6 +5,7 @@ export type ViewId =
   | 'providers'
   | 'images'
   | 'settings'
+  | 'caracteristicas'
 
 export interface MenuItem {
   id: ViewId

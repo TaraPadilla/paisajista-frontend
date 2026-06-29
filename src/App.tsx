@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
 import { PlantInspector } from './components/PlantInspector'
 import { plants } from './data/mockData'
 import { useMenuItems } from './hooks/useMenuItems'
+import { CaracteristicasPage } from './pages/CaracteristicasPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PlantsPage } from './pages/PlantsPage'
 import { SimpleModulePage } from './pages/SimpleModulePage'
@@ -130,17 +132,23 @@ const titles: Record<ViewId, { title: string; subtitle: string }> = {
     title: 'Parámetros',
     subtitle: 'Catálogos y características dinámicas del sistema.',
   },
+  caracteristicas: {
+    title: 'Características',
+    subtitle: 'Gestión de campos dinámicos y sus opciones de valor.',
+  },
 }
 
-function App() {
+function AppContent() {
   const menuItems = useMenuItems()
-  const [activeView, setActiveView] = useState<ViewId>('dashboard')
   const [useSidebar, setUseSidebar] = useState(true)
   const [searchValue, setSearchValue] = useState('')
   const [selectedPlant, setSelectedPlant] = useState<Plant>(plants[1])
   const [isInspectorOpen, setIsInspectorOpen] = useState(true)
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  const visibleTitle = titles[activeView]
+  const currentPath = location.pathname.replace('/', '') || 'dashboard'
+  const activeView = currentPath as ViewId
 
   const handleSelectPlant = (plant: Plant) => {
     setSelectedPlant(plant)
@@ -158,40 +166,44 @@ function App() {
     }
   }
 
-  const mainContent = useMemo(() => {
-    if (activeView === 'dashboard') {
-      return <DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />
-    }
-
-    if (activeView === 'plants') {
-      return <PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />
-    }
-
-    const module = moduleContent[activeView]
-    return <SimpleModulePage title={module.title} description={module.description} cards={module.cards} />
-  }, [activeView, selectedPlant])
-
   const showInspector = ['dashboard', 'plants', 'images'].includes(activeView)
 
   return (
     <AppLayout
       activeView={activeView}
-      title={visibleTitle.title}
-      subtitle={visibleTitle.subtitle}
+      title={titles[activeView].title}
+      subtitle={titles[activeView].subtitle}
       menuItems={menuItems}
       useSidebar={useSidebar}
       searchValue={searchValue}
       onSearchChange={handleSearchChange}
-      onChangeView={setActiveView}
+      onChangeView={(view) => navigate(`/${view}`)}
       onToggleNavigation={() => setUseSidebar((current) => !current)}
     >
       <div className={showInspector && isInspectorOpen ? 'workspace with-inspector' : 'workspace'}>
-        {mainContent}
+        <Routes>
+          <Route path="/" element={<DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/dashboard" element={<DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/clients" element={<SimpleModulePage title={moduleContent.clients.title} description={moduleContent.clients.description} cards={moduleContent.clients.cards} />} />
+          <Route path="/providers" element={<SimpleModulePage title={moduleContent.providers.title} description={moduleContent.providers.description} cards={moduleContent.providers.cards} />} />
+          <Route path="/images" element={<SimpleModulePage title={moduleContent.images.title} description={moduleContent.images.description} cards={moduleContent.images.cards} />} />
+          <Route path="/caracteristicas" element={<CaracteristicasPage />} />
+          <Route path="/settings" element={<SimpleModulePage title={moduleContent.settings.title} description={moduleContent.settings.description} cards={moduleContent.settings.cards} />} />
+        </Routes>
         {showInspector && (
           <PlantInspector plant={selectedPlant} isOpen={isInspectorOpen} onClose={() => setIsInspectorOpen(false)} />
         )}
       </div>
     </AppLayout>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   )
 }
 
