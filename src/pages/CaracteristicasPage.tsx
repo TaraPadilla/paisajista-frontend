@@ -65,7 +65,19 @@ export function CaracteristicasPage() {
         ...data,
         caracteristica_id: selectedCaracteristica.id
       } as Omit<CaracteristicaOpcion, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'caracteristica'>)
-      setOpciones([...opciones, newOpcion])
+      const nextOpciones = [...opciones, newOpcion]
+      const nextSelectedCaracteristica = {
+        ...selectedCaracteristica,
+        opciones: nextOpciones,
+      }
+
+      setOpciones(nextOpciones)
+      setSelectedCaracteristica(nextSelectedCaracteristica)
+      setCaracteristicas((current) =>
+        current.map((caracteristica) =>
+          caracteristica.id === selectedCaracteristica.id ? nextSelectedCaracteristica : caracteristica,
+        ),
+      )
       setShowOpcionModal(false)
     } catch (error) {
       console.error('Error creating opcion:', error)
@@ -86,9 +98,22 @@ export function CaracteristicasPage() {
   }
 
   const handleDeleteOpcion = async (id: number) => {
+    if (!selectedCaracteristica) return
     try {
       await caracteristicaOpcionService.remove(id)
-      setOpciones(opciones.filter(o => o.id !== id))
+      const nextOpciones = opciones.filter(o => o.id !== id)
+      const nextSelectedCaracteristica = {
+        ...selectedCaracteristica,
+        opciones: nextOpciones,
+      }
+
+      setOpciones(nextOpciones)
+      setSelectedCaracteristica(nextSelectedCaracteristica)
+      setCaracteristicas((current) =>
+        current.map((caracteristica) =>
+          caracteristica.id === selectedCaracteristica.id ? nextSelectedCaracteristica : caracteristica,
+        ),
+      )
     } catch (error) {
       console.error('Error deleting opcion:', error)
     }
@@ -127,20 +152,32 @@ export function CaracteristicasPage() {
             <div className="empty-state">No hay características encontradas</div>
           ) : (
             filteredCaracteristicas.map((caracteristica) => (
-              <button
+              <div
                 className={selectedCaracteristica?.id === caracteristica.id ? 'caracteristica-row selected' : 'caracteristica-row'}
                 key={caracteristica.id}
-                type="button"
-                onClick={() => handleSelectCaracteristica(caracteristica)}
               >
-                <span className="caracteristica-info">
-                  <strong>{caracteristica.nombre}</strong>
-                  <small>{caracteristica.codigo || 'Sin código'}</small>
-                </span>
-                <span className="caracteristica-count">
-                  {(caracteristica.opciones || []).length} opciones
-                </span>
-              </button>
+                <button
+                  className="caracteristica-select"
+                  type="button"
+                  onClick={() => handleSelectCaracteristica(caracteristica)}
+                >
+                  <span className="caracteristica-info">
+                    <strong>{caracteristica.nombre}</strong>
+                    <small>{caracteristica.codigo || 'Sin código'}</small>
+                  </span>
+                  <span className="caracteristica-count">
+                    {(caracteristica.opciones || []).length} opciones
+                  </span>
+                </button>
+                <button
+                  className="danger-action"
+                  type="button"
+                  onClick={() => handleDeleteCaracteristica(caracteristica.id)}
+                  title="Eliminar característica"
+                >
+                  Eliminar
+                </button>
+              </div>
             ))
           )}
         </div>

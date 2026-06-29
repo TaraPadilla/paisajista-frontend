@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 interface SimpleModulePageProps {
   title: string
   description: string
@@ -5,10 +7,13 @@ interface SimpleModulePageProps {
     title: string
     body: string
     meta: string
+    route?: string
   }>
 }
 
 export function SimpleModulePage({ title, description, cards }: SimpleModulePageProps) {
+  const navigate = useNavigate()
+
   return (
     <section className="panel full-panel">
       <div className="panel-header">
@@ -22,7 +27,14 @@ export function SimpleModulePage({ title, description, cards }: SimpleModulePage
           <article className="module-card" key={card.title}>
             <h3>{card.title}</h3>
             <p>{card.body}</p>
-            <span>{card.meta}</span>
+            <div className="module-card-footer">
+              <span>{card.meta}</span>
+              {card.route && (
+                <button className="module-card-action" type="button" onClick={() => navigate(card.route!)}>
+                  Abrir
+                </button>
+              )}
+            </div>
           </article>
         ))}
       </div>

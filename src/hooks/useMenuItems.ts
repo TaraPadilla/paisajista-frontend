@@ -32,12 +32,6 @@ export const useMenuItems = (): MenuItem[] => [
     icon: 'image',
   },
   {
-    id: 'caracteristicas',
-    label: 'Características',
-    description: 'Campos dinámicos y opciones',
-    icon: 'list',
-  },
-  {
     id: 'settings',
     label: 'Parámetros',
     description: 'Catálogos y campos dinámicos',

@@ -18,7 +18,7 @@ const moduleContent: Record<
   {
     title: string
     description: string
-    cards: Array<{ title: string; body: string; meta: string }>
+    cards: Array<{ title: string; body: string; meta: string; route?: string }>
   }
 > = {
   clients: {
@@ -97,6 +97,7 @@ const moduleContent: Record<
         title: 'Características',
         body: 'Exposición solar, riego, heladas, suelo, altura, copa, floración y estilo.',
         meta: '11 campos base',
+        route: '/caracteristicas',
       },
       {
         title: 'Parámetros generales',
