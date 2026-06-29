@@ -580,10 +580,15 @@ button {
 
 .plant-row small,
 .table-plant small,
-.plant-row em,
-.table-row span {
+.plant-row em {
   color: var(--muted);
   font-size: 12px;
+}
+
+.table-row span {
+  color: #26372d;
+  font-size: 13px;
+  line-height: 1.25;
 }
 
 .plant-row em {
@@ -770,13 +775,13 @@ button {
 .table-head,
 .table-row {
   grid-template-columns: 60px 100px 1fr 1.5fr 80px 80px;
-  padding: 10px 12px;
+  padding: 7px 12px;
 }
 
 .table-head {
   display: grid;
   gap: 12px;
-  color: #69756d;
+  color: #354238;
   background: #f6f2eb;
   border-bottom: 1px solid var(--line);
   font-size: 10px;
@@ -1122,6 +1127,8 @@ button {
 .data-table {
   flex: 1;
   overflow-y: auto;
+  align-content: start;
+  grid-auto-rows: max-content;
 }
 
 .modal-overlay {
