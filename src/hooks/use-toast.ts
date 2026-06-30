@@ -4,39 +4,58 @@ export interface ToastProps {
   description?: string;
 }
 
+const TOAST_CONTAINER_ID = 'app-toast-container';
+
 export function toast(props: ToastProps) {
   const { variant = 'default', title, description } = props;
-  
-  // Simple console-based toast for now
-  // TODO: Replace with a proper toast library like sonner or react-hot-toast
+
   console.log(`[${variant.toUpperCase()}] ${title}: ${description}`);
-  
-  // Optional: Create a simple DOM-based notification
+
   if (typeof document !== 'undefined') {
+    let container = document.getElementById(TOAST_CONTAINER_ID);
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = TOAST_CONTAINER_ID;
+      container.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: grid;
+        gap: 10px;
+        z-index: 2147483647;
+        pointer-events: none;
+      `;
+      document.body.appendChild(container);
+    }
+
     const toastElement = document.createElement('div');
     toastElement.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 16px;
-      border-radius: 8px;
-      background: ${variant === 'destructive' ? '#ef4444' : '#22c55e'};
+      width: min(360px, calc(100vw - 40px));
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: ${variant === 'destructive' ? '#8f2f24' : '#214f34'};
       color: white;
-      z-index: 9999;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      max-width: 300px;
-      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 18px 42px rgba(20, 34, 26, .22);
+      border: 1px solid rgba(255, 255, 255, .18);
+      animation: slideIn .22s ease-out;
+      pointer-events: auto;
     `;
-    
-    toastElement.innerHTML = `
-      <div style="font-weight: bold; margin-bottom: 4px;">${title || ''}</div>
-      <div style="font-size: 14px;">${description || ''}</div>
-    `;
-    
-    document.body.appendChild(toastElement);
-    
+
+    const titleElement = document.createElement('div');
+    titleElement.textContent = title || (variant === 'destructive' ? 'Error' : 'Listo');
+    titleElement.style.cssText = 'font-weight: 800; margin-bottom: 4px;';
+
+    const descriptionElement = document.createElement('div');
+    descriptionElement.textContent = description || '';
+    descriptionElement.style.cssText = 'font-size: 13px; line-height: 1.35;';
+
+    toastElement.appendChild(titleElement);
+    toastElement.appendChild(descriptionElement);
+    container.appendChild(toastElement);
+
     setTimeout(() => {
-      toastElement.style.animation = 'slideOut 0.3s ease-out';
+      toastElement.style.animation = 'slideOut .22s ease-out';
       setTimeout(() => toastElement.remove(), 300);
     }, 3000);
   }

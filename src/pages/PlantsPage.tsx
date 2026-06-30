@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { PlantaCaracteristicaService } from '../../services/api/PlantaCaracteristicaService'
+import type { PlantaCaracteristicaPayload } from '../../services/api/PlantaCaracteristicaService'
 import { PlantaService } from '../../services/api/PlantaService'
 import type { Planta, PlantaPayload } from '../../services/api/PlantaService'
 import { Icon } from '../components/Layout/Icon'
@@ -6,6 +8,7 @@ import { CreatePlantModal } from '../components/plantas/CreatePlantModal'
 import type { Plant } from '../types/plant'
 
 const plantaService = new PlantaService()
+const plantaCaracteristicaService = new PlantaCaracteristicaService()
 
 const plantColors: Plant['color'][] = ['green', 'violet', 'wine', 'gold', 'blue']
 
@@ -42,6 +45,7 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null)
+  const [deletingPlantId, setDeletingPlantId] = useState<number | null>(null)
   const initialSelectedPlantId = useRef(selectedPlant.id)
   const onSelectPlantRef = useRef(onSelectPlant)
 
@@ -65,9 +69,20 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
     loadPlants()
   }, [])
 
-  const handleCreatePlant = async (payload: PlantaPayload) => {
+  const handleCreatePlant = async (
+    payload: PlantaPayload,
+    caracteristicas: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>>,
+  ) => {
     try {
       const newPlanta = await plantaService.create(payload)
+      await Promise.all(
+        caracteristicas.map((caracteristica) =>
+          plantaCaracteristicaService.create({
+            ...caracteristica,
+            planta_id: newPlanta.id,
+          }),
+        ),
+      )
       const newPlant = toPlantView(newPlanta, plants.length)
 
       setPlants((current) => [...current, newPlant])
@@ -98,7 +113,10 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
   }
 
   const handleDeletePlant = async (plantId: number) => {
+    if (deletingPlantId) return
+
     try {
+      setDeletingPlantId(plantId)
       await plantaService.remove(plantId)
 
       setPlants((current) => {
@@ -112,6 +130,8 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
       })
     } catch (error) {
       console.error('Error deleting planta:', error)
+    } finally {
+      setDeletingPlantId(null)
     }
   }
 
@@ -164,8 +184,8 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
               <span className="table-plant">
                 <i className={`plant-thumb ${plant.color}`} />
                 <span>
-                  <strong>{plant.scientificName}</strong>
-                  <small>{plant.commonName}</small>
+                  <strong>{plant.commonName}</strong>
+                  <small>{plant.scientificName}</small>
                 </span>
               </span>
               <span>{plant.sunlight}</span>
@@ -177,8 +197,13 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
                 <button className="secondary-button table-action-button" type="button" onClick={() => setEditingPlant(plant)}>
                   Editar
                 </button>
-                <button className="danger-action table-action-button" type="button" onClick={() => handleDeletePlant(plant.id)}>
-                  Eliminar
+                <button
+                  className="danger-action table-action-button"
+                  type="button"
+                  onClick={() => handleDeletePlant(plant.id)}
+                  disabled={deletingPlantId === plant.id}
+                >
+                  {deletingPlantId === plant.id ? 'Eliminando...' : 'Eliminar'}
                 </button>
               </div>
             </div>

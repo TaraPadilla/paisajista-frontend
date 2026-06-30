@@ -194,6 +194,16 @@ button {
   box-shadow: 0 12px 28px rgba(18, 63, 41, .18);
 }
 
+.primary-button:disabled,
+.secondary-button:disabled,
+.icon-button:disabled,
+.danger-action:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+  transform: none;
+  box-shadow: none;
+}
+
 .filter-row .plant-create-button {
   background: var(--green);
   border-color: var(--green);
@@ -1314,4 +1324,56 @@ button {
   gap: 10px;
   justify-content: flex-end;
   margin-top: 24px;
+}
+
+.characteristic-form-sections {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.characteristic-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.characteristic-section legend {
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+.option-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option-pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, .9);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.form-error {
+  border: 1px solid rgba(143, 47, 36, .28);
+  border-radius: var(--radius);
+  background: #f8e9e5;
+  color: #8f2f24;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.inline-empty-state {
+  min-height: 72px;
 }

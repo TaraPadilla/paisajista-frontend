@@ -1,6 +1,11 @@
 import axios, { type AxiosInstance } from 'axios';
 import { toast } from '@/hooks/use-toast';
 
+interface ApiEnvelope<T> {
+  message?: string;
+  data?: T;
+}
+
 export class BaseApiService {
   private api: AxiosInstance;
   private baseURL: string;
@@ -38,17 +43,17 @@ export class BaseApiService {
 
   protected async get<T>(endpoint: string): Promise<T> {
     const { data } = await this.api.get(endpoint);
-    return data as T;
+    return this.unwrapResponse<T>(data);
   }
 
   protected async post<T>(endpoint: string, body: any): Promise<T> {
     const { data } = await this.api.post(endpoint, body);
-    return data as T;
+    return this.unwrapResponse<T>(data, true);
   }
 
   protected async put<T>(endpoint: string, body: any): Promise<T> {
     const { data } = await this.api.put(endpoint, body);
-    return data as T;
+    return this.unwrapResponse<T>(data, true);
   }
 
   protected async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
@@ -57,12 +62,35 @@ export class BaseApiService {
         'Content-Type': undefined
       }
     });
-    return data as T;
+    return this.unwrapResponse<T>(data, true);
   }
 
   protected async delete<T>(endpoint: string): Promise<T> {
     const { data } = await this.api.delete(endpoint);
-    return data as T;
+    return this.unwrapResponse<T>(data, true);
+  }
+
+  private unwrapResponse<T>(responseData: T | ApiEnvelope<T>, showSuccessToast = false): T {
+    if (this.isApiEnvelope<T>(responseData)) {
+      if (showSuccessToast && responseData.message) {
+        toast({
+          title: 'Listo',
+          description: responseData.message,
+        });
+      }
+
+      return responseData.data as T;
+    }
+
+    return responseData as T;
+  }
+
+  private isApiEnvelope<T>(responseData: T | ApiEnvelope<T>): responseData is ApiEnvelope<T> {
+    return (
+      responseData !== null &&
+      typeof responseData === 'object' &&
+      'message' in responseData
+    );
   }
 
   private handleError(error: any): void {

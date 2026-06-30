@@ -15,8 +15,8 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
     <aside className="plant-inspector" aria-label="Ficha técnica de planta">
       <div className="inspector-head">
         <div>
-          <h2>{plant.scientificName}</h2>
-          <p>{plant.commonName}</p>
+          <h2>{plant.commonName}</h2>
+          <p>{plant.scientificName}</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Cerrar ficha">×</button>
       </div>
