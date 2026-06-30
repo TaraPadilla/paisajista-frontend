@@ -66,7 +66,17 @@ export function CreatePlantModal({
     }
   }
 
-  const caracteristicaGroups = configurationError ? [] : groupCaracteristicasByTipo(caracteristicas)
+  const caracteristicaGroups = (() => {
+    if (configurationError) {
+      return []
+    }
+
+    try {
+      return groupCaracteristicasByTipo(caracteristicas)
+    } catch (error) {
+      return []
+    }
+  })()
 
   const collectCaracteristicaValues = (formData: FormData): Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>> => {
     const values: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>> = []
@@ -218,7 +228,7 @@ export function CreatePlantModal({
             <button type="button" className="secondary-button" onClick={onClose} disabled={submitting}>
               Cancelar
             </button>
-            <button type="submit" className="primary-button" disabled={submitting}>
+            <button type="submit" className="primary-button" disabled={submitting || loadingCaracteristicas || Boolean(configurationError)}>
               {submitting ? 'Guardando...' : submitLabel}
             </button>
           </div>

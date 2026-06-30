@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { PlantaCaracteristicaService } from '../../services/api/PlantaCaracteristicaService'
-import type { PlantaCaracteristicaPayload } from '../../services/api/PlantaCaracteristicaService'
+import { useNavigate } from 'react-router-dom'
 import { PlantaService } from '../../services/api/PlantaService'
 import type { Planta, PlantaPayload } from '../../services/api/PlantaService'
 import { Icon } from '../components/Layout/Icon'
@@ -8,7 +7,6 @@ import { CreatePlantModal } from '../components/plantas/CreatePlantModal'
 import type { Plant } from '../types/plant'
 
 const plantaService = new PlantaService()
-const plantaCaracteristicaService = new PlantaCaracteristicaService()
 
 const plantColors: Plant['color'][] = ['green', 'violet', 'wine', 'gold', 'blue']
 
@@ -41,9 +39,9 @@ interface PlantsPageProps {
 }
 
 export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
+  const navigate = useNavigate()
   const [plants, setPlants] = useState<Plant[]>([])
   const [loading, setLoading] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null)
   const [deletingPlantId, setDeletingPlantId] = useState<number | null>(null)
   const initialSelectedPlantId = useRef(selectedPlant.id)
@@ -68,30 +66,6 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
 
     loadPlants()
   }, [])
-
-  const handleCreatePlant = async (
-    payload: PlantaPayload,
-    caracteristicas: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>>,
-  ) => {
-    try {
-      const newPlanta = await plantaService.create(payload)
-      await Promise.all(
-        caracteristicas.map((caracteristica) =>
-          plantaCaracteristicaService.create({
-            ...caracteristica,
-            planta_id: newPlanta.id,
-          }),
-        ),
-      )
-      const newPlant = toPlantView(newPlanta, plants.length)
-
-      setPlants((current) => [...current, newPlant])
-      onSelectPlant(newPlant)
-      setShowCreateModal(false)
-    } catch (error) {
-      console.error('Error creating planta:', error)
-    }
-  }
 
   const handleUpdatePlant = async (payload: PlantaPayload) => {
     if (!editingPlant) return
@@ -143,7 +117,7 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
           <p>Vista administrativa tipo Airtable para mantener fichas técnicas completas.</p>
         </div>
         <div className="filter-row">
-          <button className="primary-button plant-create-button" type="button" onClick={() => setShowCreateModal(true)}>
+          <button className="primary-button plant-create-button" type="button" onClick={() => navigate('/plants/new')}>
             <Icon name="plus" />
             Nueva planta
           </button>
@@ -210,9 +184,6 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
           ))
         )}
       </div>
-      {showCreateModal && (
-        <CreatePlantModal onClose={() => setShowCreateModal(false)} onCreate={handleCreatePlant} />
-      )}
       {editingPlant && (
         <CreatePlantModal
           title="Editar planta"

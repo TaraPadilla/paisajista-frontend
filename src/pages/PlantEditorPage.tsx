@@ -1,0 +1,409 @@
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { CaracteristicaService } from '../../services/api/CaracteristicaService'
+import type { Caracteristica } from '../../services/api/CaracteristicaService'
+import type { PlantaCaracteristicaPayload } from '../../services/api/PlantaCaracteristicaService'
+import { PlantaService } from '../../services/api/PlantaService'
+import type { PlantaPayload } from '../../services/api/PlantaService'
+import {
+  getCaracteristicaFieldKind,
+  groupCaracteristicasByTipo,
+  type CaracteristicaGroup,
+} from '../components/caracteristicas/caracteristicaField'
+
+type EditorSection = 'identidad' | string
+type FieldValue = string | string[]
+
+const plantaService = new PlantaService()
+const caracteristicaService = new CaracteristicaService()
+
+export function PlantEditorPage() {
+  const navigate = useNavigate()
+  const [activeSection, setActiveSection] = useState<EditorSection>('identidad')
+  const [submitting, setSubmitting] = useState(false)
+  const [loadingCaracteristicas, setLoadingCaracteristicas] = useState(true)
+  const [configurationError, setConfigurationError] = useState<string | null>(null)
+  const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([])
+  const [baseValues, setBaseValues] = useState<PlantaPayload>({
+    nombre_comun: '',
+    nombre_cientifico: null,
+    descripcion: null,
+    observaciones: null,
+  })
+  const [fieldValues, setFieldValues] = useState<Record<number, FieldValue>>({})
+
+  useEffect(() => {
+    const loadCaracteristicas = async () => {
+      try {
+        const data = await caracteristicaService.getAll()
+        groupCaracteristicasByTipo(data)
+        setCaracteristicas(data)
+      } catch (error) {
+        setConfigurationError(error instanceof Error ? error.message : 'No se pudieron cargar las características.')
+      } finally {
+        setLoadingCaracteristicas(false)
+      }
+    }
+
+    loadCaracteristicas()
+  }, [])
+
+  const groups = useMemo<CaracteristicaGroup[]>(() => {
+    if (configurationError) {
+      return []
+    }
+
+    try {
+      return groupCaracteristicasByTipo(caracteristicas)
+    } catch {
+      return []
+    }
+  }, [caracteristicas, configurationError])
+
+  const activeGroup = groups.find((group) => group.tipoCodigo === activeSection)
+  const completedSections = [
+    Boolean(baseValues.nombre_comun.trim()),
+    groups.some((group) => group.tipoCodigo === 'requerimientos_ambientales' && hasGroupValues(group, fieldValues)),
+    groups.some((group) => group.tipoCodigo === 'morfologia_dimensiones' && hasGroupValues(group, fieldValues)),
+    groups.some((group) => group.tipoCodigo === 'criterios_esteticos' && hasGroupValues(group, fieldValues)),
+  ].filter(Boolean).length
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (submitting || loadingCaracteristicas || configurationError) return
+
+    setSubmitting(true)
+
+    try {
+      const caracteristicaValues = collectCaracteristicaValues(caracteristicas, fieldValues)
+      await plantaService.create({
+        ...normalizePlantaPayload(baseValues),
+        caracteristicas: caracteristicaValues,
+      })
+
+      navigate('/plants')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="plant-editor-page">
+      <form className="plant-editor-shell" onSubmit={handleSubmit}>
+        <header className="plant-editor-header">
+          <div>
+            <span>Nueva ficha técnica</span>
+            <h2>Nueva planta</h2>
+          </div>
+          <div className="plant-editor-actions">
+            <button className="secondary-button" type="button" onClick={() => navigate('/plants')} disabled={submitting}>
+              Cancelar
+            </button>
+            <button className="primary-button" type="submit" disabled={submitting || loadingCaracteristicas || Boolean(configurationError)}>
+              {submitting ? 'Guardando...' : 'Guardar planta'}
+            </button>
+          </div>
+        </header>
+
+        <div className="plant-editor-body">
+          <aside className="plant-editor-nav">
+            <button
+              className={activeSection === 'identidad' ? 'active' : ''}
+              type="button"
+              onClick={() => setActiveSection('identidad')}
+            >
+              <strong>Identidad</strong>
+              <span>Datos base</span>
+            </button>
+            {groups.map((group) => (
+              <button
+                className={activeSection === group.tipoCodigo ? 'active' : ''}
+                key={group.tipoCodigo}
+                type="button"
+                onClick={() => setActiveSection(group.tipoCodigo)}
+              >
+                <strong>{group.tipoNombre}</strong>
+                <span>{group.caracteristicas.length} campos</span>
+              </button>
+            ))}
+          </aside>
+
+          <main className="plant-editor-panel">
+            {activeSection === 'identidad' ? (
+              <IdentitySection baseValues={baseValues} onChange={setBaseValues} submitting={submitting} />
+            ) : loadingCaracteristicas ? (
+              <div className="empty-state inline-empty-state">Cargando características...</div>
+            ) : configurationError ? (
+              <div className="form-error">{configurationError}</div>
+            ) : activeGroup ? (
+              <CharacteristicSection
+                group={activeGroup}
+                values={fieldValues}
+                submitting={submitting}
+                onChange={setFieldValues}
+              />
+            ) : (
+              <div className="form-error">Sección de características no encontrada.</div>
+            )}
+          </main>
+
+          <aside className="plant-editor-preview">
+            <span>Vista previa</span>
+            <h3>{baseValues.nombre_comun || 'Nombre común'}</h3>
+            <p>{baseValues.nombre_cientifico || 'Nombre científico'}</p>
+            <div className="plant-preview-swatch" />
+            <div className="plant-editor-progress">
+              <div>
+                <strong>{completedSections}/4</strong>
+                <small>secciones iniciadas</small>
+              </div>
+              <progress max={4} value={completedSections} />
+            </div>
+            <ul>
+              <li className={baseValues.nombre_comun.trim() ? 'done' : ''}>Identidad</li>
+              {groups.map((group) => (
+                <li className={hasGroupValues(group, fieldValues) ? 'done' : ''} key={group.tipoCodigo}>
+                  {group.tipoNombre}
+                </li>
+              ))}
+            </ul>
+          </aside>
+        </div>
+      </form>
+    </section>
+  )
+}
+
+function IdentitySection({
+  baseValues,
+  submitting,
+  onChange,
+}: {
+  baseValues: PlantaPayload
+  submitting: boolean
+  onChange: (values: PlantaPayload) => void
+}) {
+  return (
+    <>
+      <div className="plant-editor-section-title">
+        <span>Identidad</span>
+        <h3>Datos esenciales de la planta</h3>
+      </div>
+      <div className="form-grid two-columns">
+        <div className="form-group">
+          <label>Nombre común</label>
+          <input
+            value={baseValues.nombre_comun}
+            onChange={(event) => onChange({ ...baseValues, nombre_comun: event.target.value })}
+            disabled={submitting}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Nombre científico</label>
+          <input
+            value={baseValues.nombre_cientifico ?? ''}
+            onChange={(event) => onChange({ ...baseValues, nombre_cientifico: event.target.value || null })}
+            disabled={submitting}
+          />
+        </div>
+      </div>
+      <div className="form-group">
+        <label>Descripción</label>
+        <textarea
+          value={baseValues.descripcion ?? ''}
+          onChange={(event) => onChange({ ...baseValues, descripcion: event.target.value || null })}
+          disabled={submitting}
+          rows={4}
+        />
+      </div>
+      <div className="form-group">
+        <label>Observaciones</label>
+        <textarea
+          value={baseValues.observaciones ?? ''}
+          onChange={(event) => onChange({ ...baseValues, observaciones: event.target.value || null })}
+          disabled={submitting}
+          rows={3}
+        />
+      </div>
+    </>
+  )
+}
+
+function CharacteristicSection({
+  group,
+  values,
+  submitting,
+  onChange,
+}: {
+  group: CaracteristicaGroup
+  values: Record<number, FieldValue>
+  submitting: boolean
+  onChange: (values: Record<number, FieldValue>) => void
+}) {
+  return (
+    <>
+      <div className="plant-editor-section-title">
+        <span>{group.tipoNombre}</span>
+        <h3>Características de la ficha técnica</h3>
+      </div>
+      <div className="plant-characteristic-list">
+        {group.caracteristicas.map((caracteristica) => (
+          <div className="plant-characteristic-row" key={caracteristica.id}>
+            <div>
+              <strong>{caracteristica.nombre}</strong>
+              <small>{caracteristica.tipo_campo.nombre}</small>
+            </div>
+            <CharacteristicControl
+              caracteristica={caracteristica}
+              value={values[caracteristica.id]}
+              submitting={submitting}
+              onChange={(value) => onChange({ ...values, [caracteristica.id]: value })}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function CharacteristicControl({
+  caracteristica,
+  value,
+  submitting,
+  onChange,
+}: {
+  caracteristica: Caracteristica
+  value: FieldValue | undefined
+  submitting: boolean
+  onChange: (value: FieldValue) => void
+}) {
+  const fieldKind = getCaracteristicaFieldKind(caracteristica)
+
+  if (fieldKind === 'checkbox') {
+    const selectedValues = Array.isArray(value) ? value : []
+
+    return (
+      <div className="option-grid">
+        {caracteristica.opciones?.map((opcion) => (
+          <label className="option-pill" key={opcion.id}>
+            <input
+              checked={selectedValues.includes(String(opcion.id))}
+              disabled={submitting}
+              onChange={(event) => {
+                const optionValue = String(opcion.id)
+                onChange(
+                  event.target.checked
+                    ? [...selectedValues, optionValue]
+                    : selectedValues.filter((currentValue) => currentValue !== optionValue),
+                )
+              }}
+              type="checkbox"
+            />
+            {opcion.nombre}
+          </label>
+        ))}
+      </div>
+    )
+  }
+
+  if (fieldKind === 'radio') {
+    return (
+      <div className="option-grid">
+        {caracteristica.opciones?.map((opcion) => (
+          <label className="option-pill" key={opcion.id}>
+            <input
+              checked={value === String(opcion.id)}
+              disabled={submitting}
+              name={`caracteristica_${caracteristica.id}`}
+              onChange={() => onChange(String(opcion.id))}
+              type="radio"
+            />
+            {opcion.nombre}
+          </label>
+        ))}
+      </div>
+    )
+  }
+
+  if (fieldKind === 'select') {
+    return (
+      <select value={typeof value === 'string' ? value : ''} onChange={(event) => onChange(event.target.value)} disabled={submitting}>
+        <option value="">Seleccionar</option>
+        {caracteristica.opciones?.map((opcion) => (
+          <option key={opcion.id} value={opcion.id}>
+            {opcion.nombre}
+          </option>
+        ))}
+      </select>
+    )
+  }
+
+  return (
+    <input
+      value={typeof value === 'string' ? value : ''}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={submitting}
+      step={fieldKind === 'number' && caracteristica.tipo_dato.codigo === 'decimal' ? '0.01' : undefined}
+      type={fieldKind === 'number' ? 'number' : 'text'}
+    />
+  )
+}
+
+function hasGroupValues(group: CaracteristicaGroup, values: Record<number, FieldValue>): boolean {
+  return group.caracteristicas.some((caracteristica) => {
+    const value = values[caracteristica.id]
+    return Array.isArray(value) ? value.length > 0 : Boolean(value)
+  })
+}
+
+function normalizePlantaPayload(values: PlantaPayload): PlantaPayload {
+  return {
+    nombre_comun: values.nombre_comun.trim(),
+    nombre_cientifico: values.nombre_cientifico?.trim() || null,
+    descripcion: values.descripcion?.trim() || null,
+    observaciones: values.observaciones?.trim() || null,
+  }
+}
+
+function collectCaracteristicaValues(
+  caracteristicas: Caracteristica[],
+  values: Record<number, FieldValue>,
+): Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>> {
+  const payload: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>> = []
+
+  caracteristicas.forEach((caracteristica) => {
+    const fieldKind = getCaracteristicaFieldKind(caracteristica)
+    const value = values[caracteristica.id]
+
+    if (!value || (Array.isArray(value) && value.length === 0)) return
+
+    if (fieldKind === 'checkbox') {
+      ;(value as string[]).forEach((optionId) => {
+        payload.push({
+          caracteristica_id: caracteristica.id,
+          caracteristica_opcion_id: Number(optionId),
+          valor: null,
+        })
+      })
+      return
+    }
+
+    if (fieldKind === 'radio' || fieldKind === 'select') {
+      payload.push({
+        caracteristica_id: caracteristica.id,
+        caracteristica_opcion_id: Number(value),
+        valor: null,
+      })
+      return
+    }
+
+    payload.push({
+      caracteristica_id: caracteristica.id,
+      caracteristica_opcion_id: null,
+      valor: String(value),
+    })
+  })
+
+  return payload
+}

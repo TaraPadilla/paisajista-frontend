@@ -1377,3 +1377,231 @@ button {
 .inline-empty-state {
   min-height: 72px;
 }
+
+.plant-editor-page {
+  min-height: calc(100vh - 130px);
+}
+
+.plant-editor-shell {
+  min-height: calc(100vh - 130px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 253, 248, .96), rgba(246, 242, 235, .78));
+  overflow: hidden;
+}
+
+.plant-editor-header {
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px;
+}
+
+.plant-editor-header span,
+.plant-editor-section-title span,
+.plant-editor-preview > span {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.plant-editor-header h2,
+.plant-editor-section-title h3,
+.plant-editor-preview h3 {
+  margin: 4px 0 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+.plant-editor-header h2 {
+  font-size: 28px;
+}
+
+.plant-editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.plant-editor-body {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) 260px;
+  min-height: calc(100vh - 214px);
+}
+
+.plant-editor-nav {
+  border-right: 1px solid var(--line);
+  background: rgba(241, 244, 236, .42);
+  display: grid;
+  align-content: start;
+  padding: 14px;
+}
+
+.plant-editor-nav button {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  text-align: left;
+  transition: .18s ease;
+}
+
+.plant-editor-nav button:hover,
+.plant-editor-nav button.active {
+  border-color: var(--line);
+  background: rgba(255, 253, 248, .82);
+}
+
+.plant-editor-nav button.active {
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+.plant-editor-nav strong {
+  font-size: 13px;
+}
+
+.plant-editor-nav span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.plant-editor-panel {
+  padding: 24px;
+}
+
+.plant-editor-section-title {
+  margin-bottom: 20px;
+}
+
+.plant-editor-section-title h3 {
+  font-size: 24px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.form-grid.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.plant-characteristic-list {
+  display: grid;
+  gap: 12px;
+}
+
+.plant-characteristic-row {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  padding: 0 0 14px;
+}
+
+.plant-characteristic-row > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.plant-characteristic-row strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.plant-characteristic-row small {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.plant-characteristic-row select,
+.plant-characteristic-row input[type="text"],
+.plant-characteristic-row input[type="number"] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, .9);
+  color: var(--ink);
+  padding: 0 12px;
+}
+
+.plant-editor-preview {
+  border-left: 1px solid var(--line);
+  background: rgba(255, 253, 248, .64);
+  padding: 20px;
+}
+
+.plant-editor-preview h3 {
+  font-size: 24px;
+}
+
+.plant-editor-preview p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.plant-preview-swatch {
+  height: 160px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 35% 38%, rgba(73, 109, 79, .28), transparent 28%),
+    radial-gradient(circle at 65% 58%, rgba(143, 121, 77, .2), transparent 32%),
+    #f1f4ec;
+  margin: 18px 0;
+}
+
+.plant-editor-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.plant-editor-progress div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.plant-editor-progress strong {
+  color: var(--green);
+  font-size: 20px;
+}
+
+.plant-editor-progress small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.plant-editor-progress progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--green);
+}
+
+.plant-editor-preview ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.plant-editor-preview li {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.plant-editor-preview li.done {
+  color: var(--green);
+  font-weight: 800;
+}

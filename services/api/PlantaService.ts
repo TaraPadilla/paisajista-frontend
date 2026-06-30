@@ -1,4 +1,5 @@
 import { BaseApiService } from './BaseApiService';
+import type { PlantaCaracteristicaPayload } from './PlantaCaracteristicaService';
 
 export interface Planta {
   id: number;
@@ -12,6 +13,9 @@ export interface Planta {
 }
 
 export type PlantaPayload = Omit<Planta, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>;
+export type PlantaCreatePayload = PlantaPayload & {
+  caracteristicas?: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>>;
+};
 
 export class PlantaService extends BaseApiService {
   private endpoint = '/plantas';
@@ -24,7 +28,7 @@ export class PlantaService extends BaseApiService {
     return this.get<Planta>(`${this.endpoint}/${id}`);
   }
 
-  async create(planta: PlantaPayload): Promise<Planta> {
+  async create(planta: PlantaCreatePayload): Promise<Planta> {
     return this.post<Planta>(this.endpoint, planta);
   }
 
