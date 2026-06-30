@@ -96,6 +96,24 @@ button {
   letter-spacing: -.035em;
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header-title > div {
+  min-width: 0;
+}
+
+.header-logo {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
 .header-title p,
 .panel-header p,
 .module-card p,

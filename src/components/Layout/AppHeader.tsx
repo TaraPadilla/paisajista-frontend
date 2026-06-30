@@ -20,9 +20,12 @@ export function AppHeader({
   return (
     <header className="app-header">
       <div className="header-title">
-        <span className="eyebrow">Estudio activo</span>
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
+        <img className="header-logo" src="/logo.png" alt="El Paisajista" />
+        <div>
+          <span className="eyebrow">Estudio activo</span>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
+        </div>
       </div>
 
       <label className="command-search">
