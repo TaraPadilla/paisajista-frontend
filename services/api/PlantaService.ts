@@ -1,5 +1,5 @@
 import { BaseApiService } from './BaseApiService';
-import type { PlantaCaracteristicaPayload } from './PlantaCaracteristicaService';
+import type { PlantaCaracteristica, PlantaCaracteristicaPayload } from './PlantaCaracteristicaService';
 
 export interface Planta {
   id: number;
@@ -7,7 +7,7 @@ export interface Planta {
   nombre_cientifico: string | null;
   descripcion: string | null;
   observaciones: string | null;
-  caracteristicas?: PlantaCaracteristicaPayload[];
+  caracteristicas?: PlantaCaracteristica[];
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;

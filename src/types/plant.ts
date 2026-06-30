@@ -4,6 +4,8 @@ export interface Plant {
   commonName: string
   sunlight: string
   water: string
+  soil: string
+  coldResistance: string
   style: string
   type: string
   bloom: string

@@ -1,17 +1,28 @@
 import { BaseApiService } from './BaseApiService';
 
+export interface PlantaCaracteristicaCatalogo {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
+
 export interface PlantaCaracteristica {
   id: number;
   planta_id: number;
   caracteristica_id: number;
   caracteristica_opcion_id: number | null;
   valor: string | null;
+  caracteristica?: PlantaCaracteristicaCatalogo | null;
+  caracteristica_opcion?: PlantaCaracteristicaCatalogo | null;
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
 }
 
-export type PlantaCaracteristicaPayload = Omit<PlantaCaracteristica, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>;
+export type PlantaCaracteristicaPayload = Omit<
+  PlantaCaracteristica,
+  'id' | 'caracteristica' | 'caracteristica_opcion' | 'created_at' | 'updated_at' | 'deleted_at'
+>;
 
 export class PlantaCaracteristicaService extends BaseApiService {
   private endpoint = '/planta-caracteristicas';
