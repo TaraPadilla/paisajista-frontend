@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { CaracteristicaService } from '../../services/api/CaracteristicaService'
 import type { Caracteristica } from '../../services/api/CaracteristicaService'
 import type { PlantaCaracteristicaPayload } from '../../services/api/PlantaCaracteristicaService'
@@ -19,8 +19,11 @@ const caracteristicaService = new CaracteristicaService()
 
 export function PlantEditorPage() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const editingPlantId = id ? Number(id) : null
   const [activeSection, setActiveSection] = useState<EditorSection>('identidad')
   const [submitting, setSubmitting] = useState(false)
+  const [loadingPlant, setLoadingPlant] = useState(Boolean(editingPlantId))
   const [loadingCaracteristicas, setLoadingCaracteristicas] = useState(true)
   const [configurationError, setConfigurationError] = useState<string | null>(null)
   const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([])
@@ -48,6 +51,30 @@ export function PlantEditorPage() {
     loadCaracteristicas()
   }, [])
 
+  useEffect(() => {
+    if (!editingPlantId) return
+    if (caracteristicas.length === 0) return
+
+    const loadPlant = async () => {
+      try {
+        const planta = await plantaService.getById(editingPlantId)
+        setBaseValues({
+          nombre_comun: planta.nombre_comun,
+          nombre_cientifico: planta.nombre_cientifico,
+          descripcion: planta.descripcion,
+          observaciones: planta.observaciones,
+        })
+        setFieldValues(toFieldValues(planta.caracteristicas ?? [], caracteristicas))
+      } catch (error) {
+        setConfigurationError(error instanceof Error ? error.message : 'No se pudo cargar la planta.')
+      } finally {
+        setLoadingPlant(false)
+      }
+    }
+
+    loadPlant()
+  }, [editingPlantId, caracteristicas])
+
   const groups = useMemo<CaracteristicaGroup[]>(() => {
     if (configurationError) {
       return []
@@ -70,16 +97,22 @@ export function PlantEditorPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (submitting || loadingCaracteristicas || configurationError) return
+    if (submitting || loadingCaracteristicas || loadingPlant || configurationError) return
 
     setSubmitting(true)
 
     try {
       const caracteristicaValues = collectCaracteristicaValues(caracteristicas, fieldValues)
-      await plantaService.create({
+      const payload = {
         ...normalizePlantaPayload(baseValues),
         caracteristicas: caracteristicaValues,
-      })
+      }
+
+      if (editingPlantId) {
+        await plantaService.update(editingPlantId, payload)
+      } else {
+        await plantaService.create(payload)
+      }
 
       navigate('/plants')
     } finally {
@@ -92,15 +125,15 @@ export function PlantEditorPage() {
       <form className="plant-editor-shell" onSubmit={handleSubmit}>
         <header className="plant-editor-header">
           <div>
-            <span>Nueva ficha técnica</span>
-            <h2>Nueva planta</h2>
+            <span>{editingPlantId ? 'Editar ficha técnica' : 'Nueva ficha técnica'}</span>
+            <h2>{editingPlantId ? 'Editar planta' : 'Nueva planta'}</h2>
           </div>
           <div className="plant-editor-actions">
             <button className="secondary-button" type="button" onClick={() => navigate('/plants')} disabled={submitting}>
               Cancelar
             </button>
-            <button className="primary-button" type="submit" disabled={submitting || loadingCaracteristicas || Boolean(configurationError)}>
-              {submitting ? 'Guardando...' : 'Guardar planta'}
+            <button className="primary-button" type="submit" disabled={submitting || loadingCaracteristicas || loadingPlant || Boolean(configurationError)}>
+              {submitting ? 'Guardando...' : editingPlantId ? 'Actualizar planta' : 'Guardar planta'}
             </button>
           </div>
         </header>
@@ -129,7 +162,9 @@ export function PlantEditorPage() {
           </aside>
 
           <main className="plant-editor-panel">
-            {activeSection === 'identidad' ? (
+            {loadingPlant ? (
+              <div className="empty-state inline-empty-state">Cargando planta...</div>
+            ) : activeSection === 'identidad' ? (
               <IdentitySection baseValues={baseValues} onChange={setBaseValues} submitting={submitting} />
             ) : loadingCaracteristicas ? (
               <div className="empty-state inline-empty-state">Cargando características...</div>
@@ -406,4 +441,34 @@ function collectCaracteristicaValues(
   })
 
   return payload
+}
+
+function toFieldValues(
+  plantaCaracteristicas: PlantaCaracteristicaPayload[],
+  caracteristicas: Caracteristica[],
+): Record<number, FieldValue> {
+  const caracteristicasById = new Map(caracteristicas.map((caracteristica) => [caracteristica.id, caracteristica]))
+
+  return plantaCaracteristicas.reduce<Record<number, FieldValue>>((values, caracteristica) => {
+    if (caracteristica.caracteristica_opcion_id) {
+      const fieldKind = getCaracteristicaFieldKind(caracteristicasById.get(caracteristica.caracteristica_id)!)
+      const currentValue = values[caracteristica.caracteristica_id]
+      const optionValue = String(caracteristica.caracteristica_opcion_id)
+
+      values[caracteristica.caracteristica_id] =
+        fieldKind === 'checkbox'
+          ? Array.isArray(currentValue)
+            ? [...currentValue, optionValue]
+            : [optionValue]
+          : optionValue
+
+      return values
+    }
+
+    if (caracteristica.valor) {
+      values[caracteristica.caracteristica_id] = caracteristica.valor
+    }
+
+    return values
+  }, {})
 }

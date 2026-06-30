@@ -152,6 +152,7 @@ function AppContent() {
   const currentPath = location.pathname.replace('/', '') || 'dashboard'
   const currentRootPath = currentPath.split('/')[0] || 'dashboard'
   const activeView = currentRootPath as ViewId
+  const isPlantEditor = currentPath === 'plants/new' || /^plants\/\d+\/edit$/.test(currentPath)
 
   const handleSelectPlant = (plant: Plant) => {
     setSelectedPlant(plant)
@@ -169,13 +170,13 @@ function AppContent() {
     }
   }
 
-  const showInspector = ['dashboard', 'plants', 'images'].includes(activeView) && currentPath !== 'plants/new'
+  const showInspector = ['dashboard', 'plants', 'images'].includes(activeView) && !isPlantEditor
 
   return (
     <AppLayout
       activeView={activeView}
-      title={currentPath === 'plants/new' ? 'Nueva planta' : titles[activeView].title}
-      subtitle={currentPath === 'plants/new' ? 'Editor de ficha técnica botánica.' : titles[activeView].subtitle}
+      title={isPlantEditor ? (currentPath === 'plants/new' ? 'Nueva planta' : 'Editar planta') : titles[activeView].title}
+      subtitle={isPlantEditor ? 'Editor de ficha técnica botánica.' : titles[activeView].subtitle}
       menuItems={menuItems}
       useSidebar={useSidebar}
       searchValue={searchValue}
@@ -189,6 +190,7 @@ function AppContent() {
           <Route path="/dashboard" element={<DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants/new" element={<PlantEditorPage />} />
+          <Route path="/plants/:id/edit" element={<PlantEditorPage />} />
           <Route path="/clients" element={<SimpleModulePage title={moduleContent.clients.title} description={moduleContent.clients.description} cards={moduleContent.clients.cards} />} />
           <Route path="/providers" element={<SimpleModulePage title={moduleContent.providers.title} description={moduleContent.providers.description} cards={moduleContent.providers.cards} />} />
           <Route path="/images" element={<SimpleModulePage title={moduleContent.images.title} description={moduleContent.images.description} cards={moduleContent.images.cards} />} />

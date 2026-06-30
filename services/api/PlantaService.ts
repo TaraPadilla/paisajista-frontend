@@ -7,6 +7,7 @@ export interface Planta {
   nombre_cientifico: string | null;
   descripcion: string | null;
   observaciones: string | null;
+  caracteristicas?: PlantaCaracteristicaPayload[];
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
@@ -32,7 +33,7 @@ export class PlantaService extends BaseApiService {
     return this.post<Planta>(this.endpoint, planta);
   }
 
-  async update(id: number, planta: Partial<PlantaPayload>): Promise<Planta> {
+  async update(id: number, planta: Partial<PlantaCreatePayload>): Promise<Planta> {
     return this.put<Planta>(`${this.endpoint}/${id}`, planta);
   }
 

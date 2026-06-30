@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PlantaService } from '../../services/api/PlantaService'
-import type { Planta, PlantaPayload } from '../../services/api/PlantaService'
+import type { Planta } from '../../services/api/PlantaService'
 import { Icon } from '../components/Layout/Icon'
-import { CreatePlantModal } from '../components/plantas/CreatePlantModal'
 import type { Plant } from '../types/plant'
 
 const plantaService = new PlantaService()
@@ -26,13 +25,6 @@ const toPlantView = (planta: Planta, index: number): Plant => ({
   color: plantColors[index % plantColors.length],
 })
 
-const toPlantaPayload = (plant: Plant): PlantaPayload => ({
-  nombre_comun: plant.commonName,
-  nombre_cientifico: plant.scientificName === 'Sin nombre científico' ? null : plant.scientificName,
-  descripcion: plant.type === 'Sin definir' ? null : plant.type,
-  observaciones: plant.style === 'Sin definir' ? null : plant.style,
-})
-
 interface PlantsPageProps {
   selectedPlant: Plant
   onSelectPlant: (plant: Plant) => void
@@ -42,7 +34,6 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
   const navigate = useNavigate()
   const [plants, setPlants] = useState<Plant[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingPlant, setEditingPlant] = useState<Plant | null>(null)
   const [deletingPlantId, setDeletingPlantId] = useState<number | null>(null)
   const initialSelectedPlantId = useRef(selectedPlant.id)
   const onSelectPlantRef = useRef(onSelectPlant)
@@ -66,25 +57,6 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
 
     loadPlants()
   }, [])
-
-  const handleUpdatePlant = async (payload: PlantaPayload) => {
-    if (!editingPlant) return
-
-    try {
-      const updatedPlanta = await plantaService.update(editingPlant.id, payload)
-      const currentIndex = plants.findIndex((plant) => plant.id === editingPlant.id)
-      const updatedPlant = {
-        ...toPlantView(updatedPlanta, currentIndex >= 0 ? currentIndex : plants.length),
-        color: editingPlant.color,
-      }
-
-      setPlants((current) => current.map((plant) => (plant.id === editingPlant.id ? updatedPlant : plant)))
-      onSelectPlant(updatedPlant)
-      setEditingPlant(null)
-    } catch (error) {
-      console.error('Error updating planta:', error)
-    }
-  }
 
   const handleDeletePlant = async (plantId: number) => {
     if (deletingPlantId) return
@@ -168,7 +140,7 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
               <span>{plant.height}</span>
               <b>{plant.basePrice}</b>
               <div className="action-buttons" onClick={(event) => event.stopPropagation()}>
-                <button className="secondary-button table-action-button" type="button" onClick={() => setEditingPlant(plant)}>
+                <button className="secondary-button table-action-button" type="button" onClick={() => navigate(`/plants/${plant.id}/edit`)}>
                   Editar
                 </button>
                 <button
@@ -184,15 +156,6 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
           ))
         )}
       </div>
-      {editingPlant && (
-        <CreatePlantModal
-          title="Editar planta"
-          submitLabel="Actualizar"
-          initialValues={toPlantaPayload(editingPlant)}
-          onClose={() => setEditingPlant(null)}
-          onCreate={handleUpdatePlant}
-        />
-      )}
     </section>
   )
 }
