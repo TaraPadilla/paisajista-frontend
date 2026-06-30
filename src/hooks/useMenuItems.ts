@@ -10,7 +10,7 @@ export const useMenuItems = (): MenuItem[] => [
   {
     id: 'plants',
     label: 'Plantas',
-    description: 'Banco técnico de especies',
+    description: 'Banco tecnico de especies',
     icon: 'sprout',
   },
   {
@@ -25,16 +25,17 @@ export const useMenuItems = (): MenuItem[] => [
     description: 'Viveros, precios y stock',
     icon: 'briefcase',
   },
-  {
-    id: 'images',
-    label: 'Imágenes',
-    description: 'Vista en planta y corte',
-    icon: 'image',
-  },
+  // Implementar a futuro: modulo independiente para administrar imagenes de plantas.
+  // {
+  //   id: 'images',
+  //   label: 'Imagenes',
+  //   description: 'Vista en planta y corte',
+  //   icon: 'image',
+  // },
   {
     id: 'settings',
-    label: 'Parámetros',
-    description: 'Catálogos y campos dinámicos',
+    label: 'Parametros',
+    description: 'Catalogos y campos dinamicos',
     icon: 'settings',
   },
 ]
