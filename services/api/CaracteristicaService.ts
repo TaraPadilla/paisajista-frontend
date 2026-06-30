@@ -47,11 +47,11 @@ export class CaracteristicaService extends BaseApiService {
     return this.get<Caracteristica>(`${this.endpoint}/${id}`);
   }
 
-  async create(caracteristica: Omit<Caracteristica, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'tipo_caracteristica' | 'tipo_dato' | 'tipo_campo'>): Promise<Caracteristica> {
+  async create(caracteristica: Omit<Caracteristica, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'tipo_caracteristica' | 'tipo_dato' | 'tipo_campo' | 'opciones'>): Promise<Caracteristica> {
     return this.post<Caracteristica>(this.endpoint, caracteristica);
   }
 
-  async update(id: number, caracteristica: Partial<Omit<Caracteristica, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'tipo_caracteristica' | 'tipo_dato' | 'tipo_campo'>>): Promise<Caracteristica> {
+  async update(id: number, caracteristica: Partial<Omit<Caracteristica, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'tipo_caracteristica' | 'tipo_dato' | 'tipo_campo' | 'opciones'>>): Promise<Caracteristica> {
     return this.put<Caracteristica>(`${this.endpoint}/${id}`, caracteristica);
   }
 

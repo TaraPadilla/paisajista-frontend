@@ -63,7 +63,9 @@ export function ClientsPage({ searchValue }: ClientsPageProps) {
     () => tiposTercero.find((tipo) => tipo.codigo === 'cliente')?.id ?? null,
     [tiposTercero],
   )
-  const filteredClients = clients.filter((client) => matchesSearch(client, searchValue))
+  const filteredClients = clients.filter(
+    (client) => client.tipo_tercero?.codigo === 'cliente' && matchesSearch(client, searchValue),
+  )
 
   const handleCreateClient = () => {
     setEditingClient(null)

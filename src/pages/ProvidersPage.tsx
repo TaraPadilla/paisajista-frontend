@@ -63,7 +63,9 @@ export function ProvidersPage({ searchValue }: ProvidersPageProps) {
     () => tiposTercero.find((tipo) => tipo.codigo === 'proveedor')?.id ?? null,
     [tiposTercero],
   )
-  const filteredProviders = providers.filter((provider) => matchesSearch(provider, searchValue))
+  const filteredProviders = providers.filter(
+    (provider) => provider.tipo_tercero?.codigo === 'proveedor' && matchesSearch(provider, searchValue),
+  )
 
   const handleCreateProvider = () => {
     setEditingProvider(null)

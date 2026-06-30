@@ -1375,7 +1375,8 @@ button {
 }
 
 .caracteristica-info strong,
-.caracteristica-info small {
+.caracteristica-info small,
+.caracteristica-info em {
   display: block;
 }
 
@@ -1390,6 +1391,24 @@ button {
   color: var(--muted);
   font-size: 11px;
   margin-top: 2px;
+}
+
+.caracteristica-info em {
+  color: var(--green-2);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .08em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.caracteristicas-error {
+  margin: 12px;
+}
+
+.caracteristica-modal {
+  max-width: 620px;
 }
 
 .caracteristica-count {
