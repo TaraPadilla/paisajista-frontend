@@ -4,7 +4,7 @@ import { CaracteristicaService } from '../../services/api/CaracteristicaService'
 import type { Caracteristica } from '../../services/api/CaracteristicaService'
 import type { PlantaCaracteristicaPayload } from '../../services/api/PlantaCaracteristicaService'
 import { PlantaService } from '../../services/api/PlantaService'
-import type { PlantaPayload } from '../../services/api/PlantaService'
+import type { PlantaImagen, PlantaPayload } from '../../services/api/PlantaService'
 import {
   getCaracteristicaFieldKind,
   groupCaracteristicasByTipo,
@@ -13,6 +13,9 @@ import {
 
 type EditorSection = 'identidad' | string
 type FieldValue = string | string[]
+type PlantImageCode = 'cenital' | 'corte'
+type PlantImageFiles = Record<PlantImageCode, File | null>
+type PlantImagePreviews = Record<PlantImageCode, string | null>
 
 const plantaService = new PlantaService()
 const caracteristicaService = new CaracteristicaService()
@@ -34,6 +37,9 @@ export function PlantEditorPage() {
     observaciones: null,
   })
   const [fieldValues, setFieldValues] = useState<Record<number, FieldValue>>({})
+  const [imageFiles, setImageFiles] = useState<PlantImageFiles>({ cenital: null, corte: null })
+  const [currentImages, setCurrentImages] = useState<PlantaImagen[]>([])
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<PlantImagePreviews>({ cenital: null, corte: null })
 
   useEffect(() => {
     const loadCaracteristicas = async () => {
@@ -65,6 +71,7 @@ export function PlantEditorPage() {
           observaciones: planta.observaciones,
         })
         setFieldValues(toFieldValues(planta.caracteristicas ?? [], caracteristicas))
+        setCurrentImages(planta.imagenes ?? [])
       } catch (error) {
         setConfigurationError(error instanceof Error ? error.message : 'No se pudo cargar la planta.')
       } finally {
@@ -74,6 +81,21 @@ export function PlantEditorPage() {
 
     loadPlant()
   }, [editingPlantId, caracteristicas])
+
+  useEffect(() => {
+    const nextPreviewUrls: PlantImagePreviews = {
+      cenital: imageFiles.cenital ? URL.createObjectURL(imageFiles.cenital) : null,
+      corte: imageFiles.corte ? URL.createObjectURL(imageFiles.corte) : null,
+    }
+
+    setImagePreviewUrls(nextPreviewUrls)
+
+    return () => {
+      Object.values(nextPreviewUrls).forEach((url) => {
+        if (url) URL.revokeObjectURL(url)
+      })
+    }
+  }, [imageFiles])
 
   const groups = useMemo<CaracteristicaGroup[]>(() => {
     if (configurationError) {
@@ -107,11 +129,12 @@ export function PlantEditorPage() {
         ...normalizePlantaPayload(baseValues),
         caracteristicas: caracteristicaValues,
       }
+      const formData = buildPlantaFormData(payload, imageFiles)
 
       if (editingPlantId) {
-        await plantaService.update(editingPlantId, payload)
+        await plantaService.update(editingPlantId, formData)
       } else {
-        await plantaService.create(payload)
+        await plantaService.create(formData)
       }
 
       navigate('/plants')
@@ -165,7 +188,15 @@ export function PlantEditorPage() {
             {loadingPlant ? (
               <div className="empty-state inline-empty-state">Cargando planta...</div>
             ) : activeSection === 'identidad' ? (
-              <IdentitySection baseValues={baseValues} onChange={setBaseValues} submitting={submitting} />
+              <IdentitySection
+                baseValues={baseValues}
+                currentImages={currentImages}
+                imageFiles={imageFiles}
+                imagePreviewUrls={imagePreviewUrls}
+                onChange={setBaseValues}
+                onImageChange={setImageFiles}
+                submitting={submitting}
+              />
             ) : loadingCaracteristicas ? (
               <div className="empty-state inline-empty-state">Cargando características...</div>
             ) : configurationError ? (
@@ -186,7 +217,15 @@ export function PlantEditorPage() {
             <span>Vista previa</span>
             <h3>{baseValues.nombre_comun || 'Nombre común'}</h3>
             <p>{baseValues.nombre_cientifico || 'Nombre científico'}</p>
-            <div className="plant-preview-swatch" />
+            {imagePreviewUrls.corte || getImageByCode(currentImages, 'corte')?.url ? (
+              <img
+                className="plant-preview-swatch image-preview-swatch"
+                src={imagePreviewUrls.corte || getImageByCode(currentImages, 'corte')?.url || ''}
+                alt={baseValues.nombre_comun || 'Vista en corte'}
+              />
+            ) : (
+              <div className="plant-preview-swatch" />
+            )}
             <div className="plant-editor-progress">
               <div>
                 <strong>{completedSections}/4</strong>
@@ -211,12 +250,20 @@ export function PlantEditorPage() {
 
 function IdentitySection({
   baseValues,
+  currentImages,
+  imageFiles,
+  imagePreviewUrls,
   submitting,
   onChange,
+  onImageChange,
 }: {
   baseValues: PlantaPayload
+  currentImages: PlantaImagen[]
+  imageFiles: PlantImageFiles
+  imagePreviewUrls: PlantImagePreviews
   submitting: boolean
   onChange: (values: PlantaPayload) => void
+  onImageChange: (values: PlantImageFiles) => void
 }) {
   return (
     <>
@@ -261,7 +308,75 @@ function IdentitySection({
           rows={3}
         />
       </div>
+      <div className="plant-editor-section-title compact-title">
+        <span>Imagenes</span>
+        <h3>Vistas de la planta</h3>
+      </div>
+      <div className="plant-image-uploader-grid">
+        <PlantImageInput
+          code="cenital"
+          currentImage={getImageByCode(currentImages, 'cenital')}
+          file={imageFiles.cenital}
+          label="Vista en planta"
+          previewUrl={imagePreviewUrls.cenital}
+          submitting={submitting}
+          onChange={(file) => onImageChange({ ...imageFiles, cenital: file })}
+        />
+        <PlantImageInput
+          code="corte"
+          currentImage={getImageByCode(currentImages, 'corte')}
+          file={imageFiles.corte}
+          label="Vista en corte"
+          previewUrl={imagePreviewUrls.corte}
+          submitting={submitting}
+          onChange={(file) => onImageChange({ ...imageFiles, corte: file })}
+        />
+      </div>
     </>
+  )
+}
+
+function PlantImageInput({
+  code,
+  currentImage,
+  file,
+  label,
+  previewUrl,
+  submitting,
+  onChange,
+}: {
+  code: PlantImageCode
+  currentImage: PlantaImagen | undefined
+  file: File | null
+  label: string
+  previewUrl: string | null
+  submitting: boolean
+  onChange: (file: File | null) => void
+}) {
+  const imageUrl = previewUrl || currentImage?.url || null
+
+  return (
+    <div className="plant-image-uploader">
+      <div>
+        <strong>{label}</strong>
+        <small>{code === 'corte' ? 'Imagen principal en vistas' : 'Imagen complementaria'}</small>
+      </div>
+      {imageUrl ? (
+        <img src={imageUrl} alt={label} />
+      ) : (
+        <span className="plant-image-placeholder">Sin imagen</span>
+      )}
+      <label className="secondary-button plant-file-button">
+        Seleccionar
+        <input
+          accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+          disabled={submitting}
+          onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+          type="file"
+        />
+      </label>
+      <small>{file?.name || currentImage?.nombre_original || 'PNG, JPG o WEBP hasta 5 MB'}</small>
+    </div>
   )
 }
 
@@ -399,6 +514,44 @@ function normalizePlantaPayload(values: PlantaPayload): PlantaPayload {
     descripcion: values.descripcion?.trim() || null,
     observaciones: values.observaciones?.trim() || null,
   }
+}
+
+function buildPlantaFormData(
+  payload: PlantaPayload & { caracteristicas: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>> },
+  imageFiles: PlantImageFiles,
+): FormData {
+  const formData = new FormData()
+
+  formData.append('nombre_comun', payload.nombre_comun)
+  formData.append('nombre_cientifico', payload.nombre_cientifico ?? '')
+  formData.append('descripcion', payload.descripcion ?? '')
+  formData.append('observaciones', payload.observaciones ?? '')
+
+  payload.caracteristicas.forEach((caracteristica, index) => {
+    formData.append(`caracteristicas[${index}][caracteristica_id]`, String(caracteristica.caracteristica_id))
+
+    if (caracteristica.caracteristica_opcion_id) {
+      formData.append(`caracteristicas[${index}][caracteristica_opcion_id]`, String(caracteristica.caracteristica_opcion_id))
+    }
+
+    if (caracteristica.valor) {
+      formData.append(`caracteristicas[${index}][valor]`, caracteristica.valor)
+    }
+  })
+
+  if (imageFiles.cenital) {
+    formData.append('imagen_cenital', imageFiles.cenital)
+  }
+
+  if (imageFiles.corte) {
+    formData.append('imagen_corte', imageFiles.corte)
+  }
+
+  return formData
+}
+
+function getImageByCode(images: PlantaImagen[], code: PlantImageCode): PlantaImagen | undefined {
+  return images.find((image) => image.tipo_imagen?.codigo === code)
 }
 
 function collectCaracteristicaValues(

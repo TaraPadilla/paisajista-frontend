@@ -59,8 +59,8 @@ export class BaseApiService {
   protected async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
     const { data } = await this.api.post(endpoint, formData, {
       headers: {
-        'Content-Type': undefined
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return this.unwrapResponse<T>(data, true);
   }

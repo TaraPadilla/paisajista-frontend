@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
 import { PlantInspector } from './components/plantas/PlantInspector'

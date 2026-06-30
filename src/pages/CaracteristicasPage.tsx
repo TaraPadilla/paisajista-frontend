@@ -64,7 +64,7 @@ export function CaracteristicasPage() {
       const newOpcion = await caracteristicaOpcionService.create({
         ...data,
         caracteristica_id: selectedCaracteristica.id
-      } as Omit<CaracteristicaOpcion, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'caracteristica'>)
+      } as Omit<CaracteristicaOpcion, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'caracteristica'>)
       const nextOpciones = [...opciones, newOpcion]
       const nextSelectedCaracteristica = {
         ...selectedCaracteristica,

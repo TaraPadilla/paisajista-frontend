@@ -14,9 +14,9 @@ export interface CaracteristicaOpcion {
   nombre: string;
   descripcion: string | null;
   orden: number;
-  createdAt: string | null;
-  updatedAt: string | null;
-  deletedAt: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  deleted_at: string | null;
 }
 
 export class CaracteristicaOpcionService extends BaseApiService {
@@ -30,11 +30,11 @@ export class CaracteristicaOpcionService extends BaseApiService {
     return this.get<CaracteristicaOpcion>(`${this.endpoint}/${id}`);
   }
 
-  async create(caracteristicaOpcion: Omit<CaracteristicaOpcion, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'caracteristica'>): Promise<CaracteristicaOpcion> {
+  async create(caracteristicaOpcion: Omit<CaracteristicaOpcion, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'caracteristica'>): Promise<CaracteristicaOpcion> {
     return this.post<CaracteristicaOpcion>(this.endpoint, caracteristicaOpcion);
   }
 
-  async update(id: number, caracteristicaOpcion: Partial<Omit<CaracteristicaOpcion, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'caracteristica'>>): Promise<CaracteristicaOpcion> {
+  async update(id: number, caracteristicaOpcion: Partial<Omit<CaracteristicaOpcion, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'caracteristica'>>): Promise<CaracteristicaOpcion> {
     return this.put<CaracteristicaOpcion>(`${this.endpoint}/${id}`, caracteristicaOpcion);
   }
 

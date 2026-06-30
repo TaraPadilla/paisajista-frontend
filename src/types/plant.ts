@@ -6,6 +6,14 @@ export interface Plant {
   water: string
   soil: string
   coldResistance: string
+  plantType: string
+  foliageType: string
+  maxHeight: string
+  canopyDiameter: string
+  landscapeStyle: string
+  predominantColor: string
+  floweringSeason: string
+  imageUrl: string | null
   style: string
   type: string
   bloom: string

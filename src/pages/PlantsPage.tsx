@@ -8,20 +8,37 @@ import type { Plant } from '../types/plant'
 const plantaService = new PlantaService()
 
 const plantColors: Plant['color'][] = ['green', 'violet', 'wine', 'gold', 'blue']
+const emptyValue = 'Sin definir'
+
+const getCaracteristicaValue = (planta: Planta, codigo: string): string => {
+  const match = planta.caracteristicas?.find((item) => item.caracteristica?.codigo === codigo)
+
+  return match?.caracteristica_opcion?.nombre || match?.valor || emptyValue
+}
 
 const toPlantView = (planta: Planta, index: number): Plant => ({
   id: planta.id,
-  scientificName: planta.nombre_cientifico || 'Sin nombre científico',
+  scientificName: planta.nombre_cientifico || 'Sin nombre cientifico',
   commonName: planta.nombre_comun,
-  sunlight: 'Sin definir',
-  water: 'Sin definir',
-  style: planta.observaciones || 'Sin definir',
-  type: planta.descripcion || 'Sin definir',
-  bloom: 'Sin definir',
-  height: 'Sin definir',
-  canopy: 'Sin definir',
+  sunlight: getCaracteristicaValue(planta, 'exposicion_solar'),
+  water: getCaracteristicaValue(planta, 'riego'),
+  soil: getCaracteristicaValue(planta, 'tipo_suelo'),
+  coldResistance: getCaracteristicaValue(planta, 'resistencia_frio'),
+  plantType: getCaracteristicaValue(planta, 'tipo_planta'),
+  foliageType: getCaracteristicaValue(planta, 'tipo_follaje'),
+  maxHeight: getCaracteristicaValue(planta, 'altura_maxima'),
+  canopyDiameter: getCaracteristicaValue(planta, 'diametro_copa'),
+  landscapeStyle: getCaracteristicaValue(planta, 'estilo_paisajistico'),
+  predominantColor: getCaracteristicaValue(planta, 'color_predominante'),
+  floweringSeason: getCaracteristicaValue(planta, 'epoca_floracion'),
+  imageUrl: planta.imagen_principal?.url ?? null,
+  style: planta.observaciones || emptyValue,
+  type: planta.descripcion || emptyValue,
+  bloom: emptyValue,
+  height: emptyValue,
+  canopy: emptyValue,
   providers: [],
-  basePrice: 'Sin definir',
+  basePrice: emptyValue,
   color: plantColors[index % plantColors.length],
 })
 
@@ -29,6 +46,8 @@ interface PlantsPageProps {
   selectedPlant: Plant
   onSelectPlant: (plant: Plant) => void
 }
+
+const envCellClassName = (value: string) => (value === emptyValue ? 'plant-env-cell is-empty' : 'plant-env-cell')
 
 export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
   const navigate = useNavigate()
@@ -85,28 +104,23 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
     <section className="panel full-panel">
       <div className="panel-header">
         <div>
-          <h2>Gestión de plantas</h2>
-          <p>Vista administrativa tipo Airtable para mantener fichas técnicas completas.</p>
+          <h2>Gestion de plantas</h2>
+          <p>Identidad botanica y lectura ambiental rapida de cada ficha.</p>
         </div>
         <div className="filter-row">
           <button className="primary-button plant-create-button" type="button" onClick={() => navigate('/plants/new')}>
             <Icon name="plus" />
             Nueva planta
           </button>
-          <button type="button">Luz</button>
-          <button type="button">Riego</button>
-          <button type="button">Estilo</button>
-          <button type="button">Porte</button>
         </div>
       </div>
       <div className="data-table plants-table">
         <div className="table-head">
           <span>Planta</span>
-          <span>Luz</span>
+          <span>Exposicion</span>
           <span>Riego</span>
-          <span>Estilo</span>
-          <span>Altura</span>
-          <span>Precio</span>
+          <span>Suelo</span>
+          <span>Frio</span>
           <span>Acciones</span>
         </div>
         {loading ? (
@@ -128,17 +142,20 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
               tabIndex={0}
             >
               <span className="table-plant">
-                <i className={`plant-thumb ${plant.color}`} />
+                {plant.imageUrl ? (
+                  <img className="plant-thumb image-thumb" src={plant.imageUrl} alt={plant.commonName} />
+                ) : (
+                  <i className={`plant-thumb ${plant.color}`} />
+                )}
                 <span>
                   <strong>{plant.commonName}</strong>
                   <small>{plant.scientificName}</small>
                 </span>
               </span>
-              <span>{plant.sunlight}</span>
-              <span>{plant.water}</span>
-              <span>{plant.style}</span>
-              <span>{plant.height}</span>
-              <b>{plant.basePrice}</b>
+              <span className={envCellClassName(plant.sunlight)}>{plant.sunlight}</span>
+              <span className={envCellClassName(plant.water)}>{plant.water}</span>
+              <span className={envCellClassName(plant.soil)}>{plant.soil}</span>
+              <span className={envCellClassName(plant.coldResistance)}>{plant.coldResistance}</span>
               <div className="action-buttons" onClick={(event) => event.stopPropagation()}>
                 <button className="secondary-button table-action-button" type="button" onClick={() => navigate(`/plants/${plant.id}/edit`)}>
                   Editar
