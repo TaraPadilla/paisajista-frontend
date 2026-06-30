@@ -855,6 +855,49 @@ button {
   grid-template-columns: minmax(260px, 1.35fr) minmax(120px, .75fr) minmax(110px, .7fr) minmax(130px, .8fr) minmax(120px, .72fr) 150px;
 }
 
+.clients-table .client-row {
+  grid-template-columns: minmax(220px, 1.15fr) minmax(130px, .72fr) minmax(120px, .7fr) minmax(180px, 1fr) minmax(180px, 1fr) 150px;
+}
+
+.providers-table .provider-row {
+  grid-template-columns: minmax(220px, 1.15fr) minmax(130px, .72fr) minmax(120px, .7fr) minmax(180px, 1fr) minmax(180px, 1fr) 150px;
+}
+
+.client-main-cell strong,
+.client-main-cell small,
+.provider-main-cell strong,
+.provider-main-cell small {
+  display: block;
+}
+
+.client-main-cell strong,
+.provider-main-cell strong {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: #0e1b14;
+}
+
+.client-main-cell small,
+.provider-main-cell small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.client-modal,
+.provider-modal {
+  max-width: 620px;
+}
+
+.clients-page-error,
+.providers-page-error {
+  margin: 16px;
+}
+
+.dashboard-error {
+  margin: 16px;
+}
+
 .plants-table .table-row {
   cursor: pointer;
 }

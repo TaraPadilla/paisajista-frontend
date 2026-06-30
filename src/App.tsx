@@ -5,9 +5,11 @@ import { PlantInspector } from './components/plantas/PlantInspector'
 import { plants } from './data/mockData'
 import { useMenuItems } from './hooks/useMenuItems'
 import { CaracteristicasPage } from './pages/CaracteristicasPage'
+import { ClientsPage } from './pages/ClientsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PlantEditorPage } from './pages/PlantEditorPage'
 import { PlantsPage } from './pages/PlantsPage'
+import { ProvidersPage } from './pages/ProvidersPage'
 import { SimpleModulePage } from './pages/SimpleModulePage'
 import type { Plant } from './types/plant'
 import type { ViewId } from './types/navigation'
@@ -191,8 +193,8 @@ function AppContent() {
           <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants/new" element={<PlantEditorPage />} />
           <Route path="/plants/:id/edit" element={<PlantEditorPage />} />
-          <Route path="/clients" element={<SimpleModulePage title={moduleContent.clients.title} description={moduleContent.clients.description} cards={moduleContent.clients.cards} />} />
-          <Route path="/providers" element={<SimpleModulePage title={moduleContent.providers.title} description={moduleContent.providers.description} cards={moduleContent.providers.cards} />} />
+          <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/providers" element={<ProvidersPage />} />
           <Route path="/images" element={<SimpleModulePage title={moduleContent.images.title} description={moduleContent.images.description} cards={moduleContent.images.cards} />} />
           <Route path="/caracteristicas" element={<CaracteristicasPage />} />
           <Route path="/settings" element={<SimpleModulePage title={moduleContent.settings.title} description={moduleContent.settings.description} cards={moduleContent.settings.cards} />} />
