@@ -6,6 +6,7 @@ import type { Plant } from '../types/plant'
 
 interface DashboardPageProps {
   selectedPlant: Plant
+  searchValue: string
   onSelectPlant: (plant: Plant) => void
 }
 
@@ -60,7 +61,27 @@ const toPlantView = (planta: Planta, index: number): Plant => ({
   color: plantColors[index % plantColors.length],
 })
 
-export function DashboardPage({ selectedPlant, onSelectPlant }: DashboardPageProps) {
+const plantMatchesSearch = (plant: Plant, searchValue: string) => {
+  const search = searchValue.trim().toLowerCase()
+
+  if (!search) return true
+
+  return [
+    plant.commonName,
+    plant.scientificName,
+    plant.sunlight,
+    plant.water,
+    plant.soil,
+    plant.coldResistance,
+    plant.plantType,
+    plant.foliageType,
+    plant.landscapeStyle,
+    plant.predominantColor,
+    plant.floweringSeason,
+  ].some((value) => value.toLowerCase().includes(search))
+}
+
+export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: DashboardPageProps) {
   const [plants, setPlants] = useState<Plant[]>([])
   const [clientsCount, setClientsCount] = useState(0)
   const [providersCount, setProvidersCount] = useState(0)
@@ -90,7 +111,8 @@ export function DashboardPage({ selectedPlant, onSelectPlant }: DashboardPagePro
   }, [])
 
   const plantsWithImages = plants.filter((plant) => plant.cenitalImageUrl || plant.corteImageUrl).length
-  const recentPlants = plants.slice(0, 6)
+  const filteredPlants = plants.filter((plant) => plantMatchesSearch(plant, searchValue))
+  const recentPlants = filteredPlants.slice(0, 6)
   const stats = useMemo(
     () => [
       {

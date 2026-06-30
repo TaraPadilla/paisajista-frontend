@@ -163,13 +163,6 @@ function AppContent() {
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value)
-    const foundPlant = plants.find((plant) =>
-      `${plant.scientificName} ${plant.commonName} ${plant.style}`.toLowerCase().includes(value.toLowerCase()),
-    )
-
-    if (foundPlant) {
-      handleSelectPlant(foundPlant)
-    }
   }
 
   const showInspector = ['dashboard', 'plants', 'images'].includes(activeView) && !isPlantEditor
@@ -188,13 +181,13 @@ function AppContent() {
     >
       <div className={showInspector && isInspectorOpen ? 'workspace with-inspector' : 'workspace'}>
         <Routes>
-          <Route path="/" element={<DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
-          <Route path="/dashboard" element={<DashboardPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
-          <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/" element={<DashboardPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/dashboard" element={<DashboardPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
+          <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants/new" element={<PlantEditorPage />} />
           <Route path="/plants/:id/edit" element={<PlantEditorPage />} />
-          <Route path="/clients" element={<ClientsPage />} />
-          <Route path="/providers" element={<ProvidersPage />} />
+          <Route path="/clients" element={<ClientsPage searchValue={searchValue} />} />
+          <Route path="/providers" element={<ProvidersPage searchValue={searchValue} />} />
           <Route path="/images" element={<SimpleModulePage title={moduleContent.images.title} description={moduleContent.images.description} cards={moduleContent.images.cards} />} />
           <Route path="/caracteristicas" element={<CaracteristicasPage />} />
           <Route path="/settings" element={<SimpleModulePage title={moduleContent.settings.title} description={moduleContent.settings.description} cards={moduleContent.settings.cards} />} />

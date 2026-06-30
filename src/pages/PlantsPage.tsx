@@ -62,12 +62,35 @@ const toPlantView = (planta: Planta, index: number): Plant => ({
 
 interface PlantsPageProps {
   selectedPlant: Plant
+  searchValue: string
   onSelectPlant: (plant: Plant) => void
 }
 
 const envCellClassName = (value: string) => (value === emptyValue ? 'plant-env-cell is-empty' : 'plant-env-cell')
 
-export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
+const normalizeSearch = (value: string) => value.trim().toLowerCase()
+
+const plantMatchesSearch = (plant: Plant, searchValue: string) => {
+  const search = normalizeSearch(searchValue)
+
+  if (!search) return true
+
+  return [
+    plant.commonName,
+    plant.scientificName,
+    plant.sunlight,
+    plant.water,
+    plant.soil,
+    plant.coldResistance,
+    plant.plantType,
+    plant.foliageType,
+    plant.landscapeStyle,
+    plant.predominantColor,
+    plant.floweringSeason,
+  ].some((value) => value.toLowerCase().includes(search))
+}
+
+export function PlantsPage({ selectedPlant, searchValue, onSelectPlant }: PlantsPageProps) {
   const navigate = useNavigate()
   const [plants, setPlants] = useState<Plant[]>([])
   const [loading, setLoading] = useState(true)
@@ -87,6 +110,8 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
 
     loadPlants()
   }, [])
+
+  const filteredPlants = plants.filter((plant) => plantMatchesSearch(plant, searchValue))
 
   const handleDeletePlant = async (plantId: number) => {
     if (deletingPlantId) return
@@ -136,10 +161,10 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
         </div>
         {loading ? (
           <div className="empty-state">Cargando plantas...</div>
-        ) : plants.length === 0 ? (
+        ) : filteredPlants.length === 0 ? (
           <div className="empty-state">No hay plantas registradas</div>
         ) : (
-          plants.map((plant) => (
+          filteredPlants.map((plant) => (
             <div
               className={selectedPlant.id === plant.id ? 'table-row selected' : 'table-row'}
               key={plant.id}

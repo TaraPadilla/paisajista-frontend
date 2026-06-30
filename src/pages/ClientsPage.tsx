@@ -10,7 +10,27 @@ import { Icon } from '../components/Layout/Icon'
 const terceroService = new TerceroService()
 const catalogoService = new CatalogoService()
 
-export function ClientsPage() {
+interface ClientsPageProps {
+  searchValue: string
+}
+
+const matchesSearch = (client: Tercero, searchValue: string) => {
+  const search = searchValue.trim().toLowerCase()
+
+  if (!search) return true
+
+  return [
+    client.codigo,
+    client.nombre,
+    client.identificacion,
+    client.telefono,
+    client.email,
+    client.direccion,
+    client.observaciones,
+  ].some((value) => (value ?? '').toLowerCase().includes(search))
+}
+
+export function ClientsPage({ searchValue }: ClientsPageProps) {
   const [clients, setClients] = useState<Tercero[]>([])
   const [tiposTercero, setTiposTercero] = useState<Catalogo[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,6 +63,7 @@ export function ClientsPage() {
     () => tiposTercero.find((tipo) => tipo.codigo === 'cliente')?.id ?? null,
     [tiposTercero],
   )
+  const filteredClients = clients.filter((client) => matchesSearch(client, searchValue))
 
   const handleCreateClient = () => {
     setEditingClient(null)
@@ -102,7 +123,7 @@ export function ClientsPage() {
             <span>Acciones</span>
           </div>
           <ClientTable
-            clients={clients}
+            clients={filteredClients}
             deletingClientId={deletingClientId}
             loading={loading}
             onEdit={(client) => {

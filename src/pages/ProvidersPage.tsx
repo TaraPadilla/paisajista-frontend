@@ -10,7 +10,27 @@ import { ProviderTable } from '../components/proveedores/ProviderTable'
 const terceroService = new TerceroService()
 const catalogoService = new CatalogoService()
 
-export function ProvidersPage() {
+interface ProvidersPageProps {
+  searchValue: string
+}
+
+const matchesSearch = (provider: Tercero, searchValue: string) => {
+  const search = searchValue.trim().toLowerCase()
+
+  if (!search) return true
+
+  return [
+    provider.codigo,
+    provider.nombre,
+    provider.identificacion,
+    provider.telefono,
+    provider.email,
+    provider.direccion,
+    provider.observaciones,
+  ].some((value) => (value ?? '').toLowerCase().includes(search))
+}
+
+export function ProvidersPage({ searchValue }: ProvidersPageProps) {
   const [providers, setProviders] = useState<Tercero[]>([])
   const [tiposTercero, setTiposTercero] = useState<Catalogo[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,6 +63,7 @@ export function ProvidersPage() {
     () => tiposTercero.find((tipo) => tipo.codigo === 'proveedor')?.id ?? null,
     [tiposTercero],
   )
+  const filteredProviders = providers.filter((provider) => matchesSearch(provider, searchValue))
 
   const handleCreateProvider = () => {
     setEditingProvider(null)
@@ -102,7 +123,7 @@ export function ProvidersPage() {
             <span>Acciones</span>
           </div>
           <ProviderTable
-            providers={providers}
+            providers={filteredProviders}
             deletingProviderId={deletingProviderId}
             loading={loading}
             onEdit={(provider) => {
