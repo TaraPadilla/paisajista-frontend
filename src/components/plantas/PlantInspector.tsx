@@ -10,6 +10,17 @@ const emptyValue = 'Sin definir'
 
 const hasText = (value: string) => value.trim() !== '' && value !== emptyValue
 
+const plantViews = (plant: Plant) => [
+  {
+    label: 'Vista en planta',
+    url: plant.cenitalImageUrl,
+  },
+  {
+    label: 'Vista en corte',
+    url: plant.corteImageUrl,
+  },
+]
+
 const inspectorGroups = (plant: Plant) => [
   {
     title: 'Requerimientos ambientales',
@@ -46,6 +57,7 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
 
   const hasDescription = hasText(plant.type)
   const hasObservations = hasText(plant.style)
+  const availableViews = plantViews(plant).filter((view) => view.url)
 
   return (
     <aside className="plant-inspector" aria-label="Ficha tecnica de planta">
@@ -86,6 +98,20 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
           <div className="inspector-notes">
             {hasDescription && <p>{plant.type}</p>}
             {hasObservations && <p>{plant.style}</p>}
+          </div>
+        </section>
+      )}
+
+      {availableViews.length > 0 && (
+        <section className="inspector-section">
+          <h3>Vistas disponibles</h3>
+          <div className="inspector-view-grid">
+            {availableViews.map((view) => (
+              <figure className="inspector-view-card" key={view.label}>
+                <img src={view.url ?? ''} alt={`${view.label} de ${plant.commonName}`} />
+                <figcaption>{view.label}</figcaption>
+              </figure>
+            ))}
           </div>
         </section>
       )}

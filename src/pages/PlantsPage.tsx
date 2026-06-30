@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PlantaService } from '../../services/api/PlantaService'
 import type { Planta } from '../../services/api/PlantaService'
@@ -16,6 +16,22 @@ const getCaracteristicaValue = (planta: Planta, codigo: string): string => {
   return match?.caracteristica_opcion?.nombre || match?.valor || emptyValue
 }
 
+const getPlantImageUrl = (planta: Planta): string | null => {
+  if (planta.imagen_principal?.url) {
+    return planta.imagen_principal.url
+  }
+
+  const imagenes = planta.imagenes ?? []
+  const corte = imagenes.find((imagen) => imagen.tipo_imagen?.codigo === 'corte')
+  const cenital = imagenes.find((imagen) => imagen.tipo_imagen?.codigo === 'cenital')
+
+  return corte?.url ?? cenital?.url ?? null
+}
+
+const getPlantImageUrlByCode = (planta: Planta, code: 'cenital' | 'corte'): string | null => {
+  return planta.imagenes?.find((imagen) => imagen.tipo_imagen?.codigo === code)?.url ?? null
+}
+
 const toPlantView = (planta: Planta, index: number): Plant => ({
   id: planta.id,
   scientificName: planta.nombre_cientifico || 'Sin nombre cientifico',
@@ -31,7 +47,9 @@ const toPlantView = (planta: Planta, index: number): Plant => ({
   landscapeStyle: getCaracteristicaValue(planta, 'estilo_paisajistico'),
   predominantColor: getCaracteristicaValue(planta, 'color_predominante'),
   floweringSeason: getCaracteristicaValue(planta, 'epoca_floracion'),
-  imageUrl: planta.imagen_principal?.url ?? null,
+  imageUrl: getPlantImageUrl(planta),
+  cenitalImageUrl: getPlantImageUrlByCode(planta, 'cenital'),
+  corteImageUrl: getPlantImageUrlByCode(planta, 'corte'),
   style: planta.observaciones || emptyValue,
   type: planta.descripcion || emptyValue,
   bloom: emptyValue,
@@ -54,19 +72,12 @@ export function PlantsPage({ selectedPlant, onSelectPlant }: PlantsPageProps) {
   const [plants, setPlants] = useState<Plant[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingPlantId, setDeletingPlantId] = useState<number | null>(null)
-  const initialSelectedPlantId = useRef(selectedPlant.id)
-  const onSelectPlantRef = useRef(onSelectPlant)
-
   useEffect(() => {
     const loadPlants = async () => {
       try {
         const data = await plantaService.getAll()
         const nextPlants = data.map(toPlantView)
         setPlants(nextPlants)
-
-        if (nextPlants.length > 0 && !nextPlants.some((plant) => plant.id === initialSelectedPlantId.current)) {
-          onSelectPlantRef.current(nextPlants[0])
-        }
       } catch (error) {
         console.error('Error loading plantas:', error)
       } finally {

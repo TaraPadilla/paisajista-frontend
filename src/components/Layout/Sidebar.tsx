@@ -13,7 +13,7 @@ export function Sidebar({ activeView, items, onChangeView, onClose }: SidebarPro
     <aside className="sidebar" aria-label="Menú lateral">
       <div className="brand-card">
         <div className="brand-mark">
-          <Icon name="sprout" />
+          <img src="/logo.png" alt="El Paisajista" />
         </div>
         <div>
           <strong>El Paisajista</strong>

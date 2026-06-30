@@ -352,6 +352,14 @@ button {
   color: var(--green);
   display: grid;
   place-items: center;
+  overflow: hidden;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 .sidebar-close-button {
@@ -448,7 +456,7 @@ button {
 }
 
 .workspace.with-inspector {
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 460px;
   align-items: start;
 }
 
@@ -1149,6 +1157,42 @@ button {
   margin-top: 3px;
   color: var(--green);
   font-size: 13px;
+}
+
+.inspector-view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.inspector-view-card {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, .68);
+  overflow: hidden;
+}
+
+.inspector-view-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: contain;
+  background:
+    linear-gradient(90deg, rgba(18, 63, 41, .045) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(18, 63, 41, .045) 1px, transparent 1px),
+    #fbf8f1;
+  background-size: 18px 18px;
+}
+
+.inspector-view-card figcaption {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  padding: 8px 10px;
+  text-transform: uppercase;
 }
 
 .asset-grid {

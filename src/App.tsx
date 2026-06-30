@@ -144,8 +144,8 @@ function AppContent() {
   const menuItems = useMenuItems()
   const [useSidebar, setUseSidebar] = useState(true)
   const [searchValue, setSearchValue] = useState('')
-  const [selectedPlant, setSelectedPlant] = useState<Plant>(plants[1])
-  const [isInspectorOpen, setIsInspectorOpen] = useState(true)
+  const [selectedPlant, setSelectedPlant] = useState<Plant>({ ...plants[1], id: 0 })
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 

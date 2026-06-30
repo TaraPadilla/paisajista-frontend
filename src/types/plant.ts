@@ -14,6 +14,8 @@ export interface Plant {
   predominantColor: string
   floweringSeason: string
   imageUrl: string | null
+  cenitalImageUrl: string | null
+  corteImageUrl: string | null
   style: string
   type: string
   bloom: string
