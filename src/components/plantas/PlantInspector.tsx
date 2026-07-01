@@ -57,6 +57,7 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
 
   const hasDescription = hasText(plant.type)
   const hasObservations = hasText(plant.style)
+  const providers = plant.providers.length > 0 ? plant.providers.join(', ') : emptyValue
   const availableViews = plantViews(plant).filter((view) => view.url)
 
   return (
@@ -91,6 +92,20 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
           </dl>
         </section>
       ))}
+
+      <section className="inspector-section">
+        <h3>Proveedor</h3>
+        <dl className="technical-list compact">
+          <div>
+            <dt>Proveedor</dt>
+            <dd className={providers === emptyValue ? 'is-empty' : undefined}>{providers}</dd>
+          </div>
+          <div>
+            <dt>Precio</dt>
+            <dd className={plant.basePrice === emptyValue ? 'is-empty' : undefined}>{plant.basePrice}</dd>
+          </div>
+        </dl>
+      </section>
 
       {(hasDescription || hasObservations) && (
         <section className="inspector-section">

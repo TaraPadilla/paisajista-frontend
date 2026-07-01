@@ -55,6 +55,8 @@ export function AppLayout({
           <Sidebar
             activeView={activeView}
             items={menuItems}
+            title={title}
+            subtitle={subtitle}
             onChangeView={onChangeView}
             onClose={onToggleNavigation}
           />

@@ -1,8 +1,6 @@
 import { Icon } from './Icon'
 
 interface AppHeaderProps {
-  title: string
-  subtitle: string
   useSidebar: boolean
   onToggleNavigation: () => void
   searchValue: string
@@ -10,8 +8,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  title,
-  subtitle,
   useSidebar,
   onToggleNavigation,
   searchValue,
@@ -22,9 +18,9 @@ export function AppHeader({
       <div className="header-title">
         <img className="header-logo" src="/logo.png" alt="El Paisajista" />
         <div>
-          <span className="eyebrow">Estudio activo</span>
-          <h1>{title}</h1>
-          <p>{subtitle}</p>
+          <span className="eyebrow">Sistema</span>
+          <h1>El Paisajista</h1>
+          <p>Biblioteca tecnica y diseno de proyectos.</p>
         </div>
       </div>
 
