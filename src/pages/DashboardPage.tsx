@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PlantaService } from '../../services/api/PlantaService'
-import type { Planta } from '../../services/api/PlantaService'
-import { TerceroService } from '../../services/api/TerceroService'
+import { DashboardService } from '../../services/api/DashboardService'
 import type { Plant } from '../types/plant'
 
 interface DashboardPageProps {
@@ -10,94 +8,11 @@ interface DashboardPageProps {
   onSelectPlant: (plant: Plant) => void
 }
 
-const plantaService = new PlantaService()
-const terceroService = new TerceroService()
-const plantColors: Plant['color'][] = ['green', 'violet', 'wine', 'gold', 'blue']
-const emptyValue = 'Sin definir'
+const dashboardService = new DashboardService()
 
-const getCaracteristicaValue = (planta: Planta, codigo: string): string => {
-  const values = planta.caracteristicas
-    ?.filter((item) => item.caracteristica?.codigo === codigo)
-    .map((item) => item.caracteristica_opcion?.nombre || item.valor)
-    .filter((value): value is string => Boolean(value && value.trim()))
-
-  return values && values.length > 0 ? values.join(', ') : emptyValue
-}
-
-const getPlantImageUrlByCode = (planta: Planta, code: 'cenital' | 'corte'): string | null => {
-  return planta.imagenes?.find((imagen) => imagen.tipo_imagen?.codigo === code)?.url ?? null
-}
-
-const getPlantImageUrl = (planta: Planta): string | null => {
-  if (planta.imagen_principal?.url) {
-    return planta.imagen_principal.url
-  }
-
-  return getPlantImageUrlByCode(planta, 'corte') ?? getPlantImageUrlByCode(planta, 'cenital')
-}
-
-const getPlantProviders = (planta: Planta): string[] => {
-  return planta.proveedores
-    ?.map((proveedor) => proveedor.tercero?.nombre)
-    .filter((provider): provider is string => Boolean(provider)) ?? []
-}
-
-const getPlantBasePrice = (planta: Planta): string => {
-  const precio = planta.proveedores?.[0]?.precio
-
-  return typeof precio === 'number' ? precio.toLocaleString('es-CO') : emptyValue
-}
-
-const toPlantView = (planta: Planta, index: number): Plant => ({
-  id: planta.id,
-  scientificName: planta.nombre_cientifico || 'Sin nombre cientifico',
-  commonName: planta.nombre_comun,
-  sunlight: getCaracteristicaValue(planta, 'exposicion_solar'),
-  water: getCaracteristicaValue(planta, 'riego'),
-  soil: getCaracteristicaValue(planta, 'tipo_suelo'),
-  coldResistance: getCaracteristicaValue(planta, 'resistencia_frio'),
-  plantType: getCaracteristicaValue(planta, 'tipo_planta'),
-  foliageType: getCaracteristicaValue(planta, 'tipo_follaje'),
-  maxHeight: getCaracteristicaValue(planta, 'altura_maxima'),
-  canopyDiameter: getCaracteristicaValue(planta, 'diametro_copa'),
-  landscapeStyle: getCaracteristicaValue(planta, 'estilo_paisajistico'),
-  predominantColor: getCaracteristicaValue(planta, 'color_predominante'),
-  floweringSeason: getCaracteristicaValue(planta, 'epoca_floracion'),
-  imageUrl: getPlantImageUrl(planta),
-  cenitalImageUrl: getPlantImageUrlByCode(planta, 'cenital'),
-  corteImageUrl: getPlantImageUrlByCode(planta, 'corte'),
-  style: planta.observaciones || emptyValue,
-  type: planta.descripcion || emptyValue,
-  bloom: emptyValue,
-  height: emptyValue,
-  canopy: emptyValue,
-  providers: getPlantProviders(planta),
-  basePrice: getPlantBasePrice(planta),
-  color: plantColors[index % plantColors.length],
-})
-
-const plantMatchesSearch = (plant: Plant, searchValue: string) => {
-  const search = searchValue.trim().toLowerCase()
-
-  if (!search) return true
-
-  return [
-    plant.commonName,
-    plant.scientificName,
-    plant.sunlight,
-    plant.water,
-    plant.soil,
-    plant.coldResistance,
-    plant.plantType,
-    plant.foliageType,
-    plant.landscapeStyle,
-    plant.predominantColor,
-    plant.floweringSeason,
-  ].some((value) => value.toLowerCase().includes(search))
-}
-
-export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: DashboardPageProps) {
-  const [plants, setPlants] = useState<Plant[]>([])
+export function DashboardPage({ selectedPlant: _selectedPlant, searchValue: _searchValue, onSelectPlant: _onSelectPlant }: DashboardPageProps) {
+  const [plantsCount, setPlantsCount] = useState(0)
+  const [plantsWithImages, setPlantsWithImages] = useState(0)
   const [clientsCount, setClientsCount] = useState(0)
   const [providersCount, setProvidersCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -106,15 +21,12 @@ export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: Das
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const [plantasData, clientesData, proveedoresData] = await Promise.all([
-          plantaService.getAll(),
-          terceroService.getClientes(),
-          terceroService.getProveedores(),
-        ])
+        const resumen = await dashboardService.getResumen()
 
-        setPlants(plantasData.map(toPlantView))
-        setClientsCount(clientesData.length)
-        setProvidersCount(proveedoresData.length)
+        setPlantsCount(resumen.counts.plantas)
+        setPlantsWithImages(resumen.counts.plantas_con_imagenes)
+        setClientsCount(resumen.counts.clientes)
+        setProvidersCount(resumen.counts.proveedores)
       } catch (error) {
         setDashboardError(error instanceof Error ? error.message : 'No se pudo cargar el dashboard.')
       } finally {
@@ -125,20 +37,19 @@ export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: Das
     loadDashboard()
   }, [])
 
-  const plantsWithImages = plants.filter((plant) => plant.cenitalImageUrl || plant.corteImageUrl).length
-  const filteredPlants = plants.filter((plant) => plantMatchesSearch(plant, searchValue))
-  const recentPlants = filteredPlants.slice(0, 6)
+  const imageCoverage = plantsCount > 0 ? Math.round((plantsWithImages / plantsCount) * 100) : 0
+
   const stats = useMemo(
     () => [
       {
         label: 'Plantas activas',
-        value: loading ? '...' : String(plants.length),
+        value: loading ? '...' : String(plantsCount),
         detail: 'Registros en catalogo',
       },
       {
         label: 'Plantas con imagenes',
         value: loading ? '...' : String(plantsWithImages),
-        detail: plants.length > 0 ? `${Math.round((plantsWithImages / plants.length) * 100)}% del catalogo` : 'Sin imagenes cargadas',
+        detail: plantsCount > 0 ? `${imageCoverage}% del catalogo` : 'Sin imagenes cargadas',
       },
       {
         label: 'Clientes',
@@ -151,7 +62,7 @@ export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: Das
         detail: 'Terceros tipo proveedor',
       },
     ],
-    [clientsCount, loading, plants.length, plantsWithImages, providersCount],
+    [clientsCount, imageCoverage, loading, plantsCount, plantsWithImages, providersCount],
   )
 
   return (
@@ -166,64 +77,29 @@ export function DashboardPage({ selectedPlant, searchValue, onSelectPlant }: Das
         ))}
       </section>
 
-      <section className="panel plant-panel">
-        <div className="panel-header">
-          <div>
-            <h2>Banco de plantas</h2>
-            <p>Especies listas para revisar por ambiente, morfologia y criterio estetico.</p>
-          </div>
-          <span className="status-chip">{loading ? 'Cargando' : `${plants.length} especies`}</span>
-        </div>
-        <div className="plant-list">
-          {dashboardError ? (
-            <div className="form-error dashboard-error">{dashboardError}</div>
-          ) : loading ? (
-            <div className="empty-state">Cargando plantas...</div>
-          ) : recentPlants.length === 0 ? (
-            <div className="empty-state">No hay plantas registradas</div>
-          ) : (
-            recentPlants.map((plant) => (
-              <button
-                className={selectedPlant.id === plant.id ? 'plant-row selected' : 'plant-row'}
-                key={plant.id}
-                type="button"
-                onClick={() => onSelectPlant(plant)}
-              >
-                {plant.imageUrl ? (
-                  <img className="plant-thumb image-thumb" src={plant.imageUrl} alt={plant.commonName} />
-                ) : (
-                  <span className={`plant-thumb ${plant.color}`} />
-                )}
-                <span>
-                  <strong>{plant.scientificName}</strong>
-                  <small>{plant.commonName}</small>
-                </span>
-                <em>{plant.sunlight}</em>
-                <em>{plant.water}</em>
-                <b>{plant.corteImageUrl || plant.cenitalImageUrl ? 'Con imagen' : 'Sin imagen'}</b>
-              </button>
-            ))
-          )}
-        </div>
-      </section>
+      {dashboardError && (
+        <section className="panel full-panel">
+          <div className="form-error dashboard-error">{dashboardError}</div>
+        </section>
+      )}
 
-      <section className="panel project-panel">
+      <section className="panel project-panel full-panel">
         <div className="panel-header">
           <div>
             <h2>Resumen operativo</h2>
             <p>Lectura rapida del contenido cargado en el sistema.</p>
           </div>
-          <span className="status-chip">Activo</span>
+          <span className="status-chip">{loading ? 'Cargando' : 'Activo'}</span>
         </div>
         <div className="budget-layout">
           <div>
             <span className="label">Cobertura de imagenes</span>
-            <strong className="money">{plants.length > 0 ? `${Math.round((plantsWithImages / plants.length) * 100)}%` : '0%'}</strong>
+            <strong className="money">{loading ? '...' : `${imageCoverage}%`}</strong>
             <p>Porcentaje de plantas que tienen al menos una vista cargada.</p>
           </div>
-          <div className="donut">{plants.length > 0 ? `${Math.round((plantsWithImages / plants.length) * 100)}%` : '0%'}</div>
+          <div className="donut">{loading ? '...' : `${imageCoverage}%`}</div>
           <ul className="budget-list">
-            <li><span>Plantas</span><b>{plants.length}</b></li>
+            <li><span>Plantas</span><b>{plantsCount}</b></li>
             <li><span>Clientes</span><b>{clientsCount}</b></li>
             <li><span>Proveedores</span><b>{providersCount}</b></li>
           </ul>
