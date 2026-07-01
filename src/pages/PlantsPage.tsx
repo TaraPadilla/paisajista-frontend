@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { PlantaService } from '../../services/api/PlantaService'
 import type { Planta } from '../../services/api/PlantaService'
 import { Icon } from '../components/Layout/Icon'
+import { TableLoadingState } from '../components/shared/TableLoadingState'
 import type { Plant } from '../types/plant'
 
 const plantaService = new PlantaService()
@@ -175,7 +176,7 @@ export function PlantsPage({ selectedPlant, searchValue, onSelectPlant }: Plants
           <span>Acciones</span>
         </div>
         {loading ? (
-          <div className="empty-state">Cargando plantas...</div>
+          <TableLoadingState title="Cargando plantas" detail="Preparando el listado de especies..." />
         ) : filteredPlants.length === 0 ? (
           <div className="empty-state">No hay plantas registradas</div>
         ) : (

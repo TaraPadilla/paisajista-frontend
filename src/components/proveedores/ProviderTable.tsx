@@ -1,4 +1,5 @@
 import type { Tercero } from '../../../services/api/TerceroService'
+import { TableLoadingState } from '../shared/TableLoadingState'
 
 interface ProviderTableProps {
   providers: Tercero[]
@@ -12,7 +13,7 @@ const emptyValue = 'Sin definir'
 
 export function ProviderTable({ providers, deletingProviderId, loading, onEdit, onDelete }: ProviderTableProps) {
   if (loading) {
-    return <div className="empty-state">Cargando proveedores...</div>
+    return <TableLoadingState title="Cargando proveedores" detail="Preparando viveros y contactos..." />
   }
 
   if (providers.length === 0) {

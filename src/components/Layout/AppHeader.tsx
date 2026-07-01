@@ -32,7 +32,6 @@ export function AppHeader({
           placeholder="Buscar plantas, clientes, proveedores..."
           type="search"
         />
-        <kbd>⌘ K</kbd>
       </label>
 
       <div className="header-actions">
@@ -40,13 +39,10 @@ export function AppHeader({
           className="icon-button nav-toggle-button"
           type="button"
           onClick={onToggleNavigation}
-          title={useSidebar ? 'Ocultar menú lateral' : 'Mostrar menú lateral'}
-          aria-label={useSidebar ? 'Ocultar menú lateral' : 'Mostrar menú lateral'}
+          title={useSidebar ? 'Ocultar menu lateral' : 'Mostrar menu lateral'}
+          aria-label={useSidebar ? 'Ocultar menu lateral' : 'Mostrar menu lateral'}
         >
           <Icon name="layout" />
-        </button>
-        <button className="icon-button ghost" type="button" title="Notificaciones">
-          <Icon name="bell" />
         </button>
         <div className="user-chip">
           <span>GP</span>

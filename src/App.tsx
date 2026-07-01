@@ -183,7 +183,10 @@ function AppContent() {
       useSidebar={useSidebar}
       searchValue={searchValue}
       onSearchChange={handleSearchChange}
-      onChangeView={(view) => navigate(`/${view}`)}
+      onChangeView={(view) => {
+        setIsInspectorOpen(false)
+        navigate(`/${view}`)
+      }}
       onToggleNavigation={() => setUseSidebar((current) => !current)}
     >
       <div className={showInspector && isInspectorOpen ? 'workspace with-inspector' : 'workspace'}>

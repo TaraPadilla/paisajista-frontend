@@ -962,6 +962,42 @@ button {
   cursor: pointer;
 }
 
+.table-loading-state {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.table-loading-spinner {
+  width: 58px;
+  height: 58px;
+  border: 4px solid rgba(18, 63, 41, .14);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: table-loading-spin .8s linear infinite;
+}
+
+.table-loading-state strong {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.table-loading-state small {
+  font-size: 13px;
+}
+
+@keyframes table-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .table-row .plant-env-cell {
   width: max-content;
   max-width: 100%;

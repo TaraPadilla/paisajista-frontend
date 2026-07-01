@@ -1,4 +1,5 @@
 import type { Tercero } from '../../../services/api/TerceroService'
+import { TableLoadingState } from '../shared/TableLoadingState'
 
 interface ClientTableProps {
   clients: Tercero[]
@@ -12,7 +13,7 @@ const emptyValue = 'Sin definir'
 
 export function ClientTable({ clients, deletingClientId, loading, onEdit, onDelete }: ClientTableProps) {
   if (loading) {
-    return <div className="empty-state">Cargando clientes...</div>
+    return <TableLoadingState title="Cargando clientes" detail="Preparando la relacion comercial..." />
   }
 
   if (clients.length === 0) {

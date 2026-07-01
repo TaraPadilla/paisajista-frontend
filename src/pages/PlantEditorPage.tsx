@@ -12,6 +12,7 @@ import {
   type CaracteristicaGroup,
 } from '../components/caracteristicas/caracteristicaField'
 import { ProviderSelectorModal } from '../components/proveedores/ProviderSelectorModal'
+import { TableLoadingState } from '../components/shared/TableLoadingState'
 
 type EditorSection = 'identidad' | string
 type FieldValue = string | string[]
@@ -195,7 +196,7 @@ export function PlantEditorPage() {
 
           <main className="plant-editor-panel">
             {loadingPlant ? (
-              <div className="empty-state inline-empty-state">Cargando planta...</div>
+              <TableLoadingState title="Cargando planta" detail="Preparando la ficha tecnica..." />
             ) : activeSection === 'identidad' ? (
               <IdentitySection
                 baseValues={baseValues}

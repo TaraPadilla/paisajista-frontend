@@ -36,13 +36,6 @@ export function Sidebar({ activeView, items, title, subtitle, onChangeView, onCl
           </button>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-        <div className="workspace-card">
-          <span>Workspace</span>
-          <strong>Estudio Los Alamos</strong>
-        </div>
-      </div>
     </aside>
   )
 }
