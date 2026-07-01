@@ -1,5 +1,6 @@
 import { BaseApiService } from './BaseApiService';
 import type { PlantaCaracteristica, PlantaCaracteristicaPayload } from './PlantaCaracteristicaService';
+import type { PlantaProveedor } from './PlantaProveedorService';
 
 export interface PlantaImagenCatalogo {
   id: number;
@@ -30,12 +31,13 @@ export interface Planta {
   caracteristicas?: PlantaCaracteristica[];
   imagenes?: PlantaImagen[];
   imagen_principal?: PlantaImagen | null;
+  proveedores?: PlantaProveedor[];
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
 }
 
-export type PlantaPayload = Omit<Planta, 'id' | 'caracteristicas' | 'imagenes' | 'imagen_principal' | 'created_at' | 'updated_at' | 'deleted_at'>;
+export type PlantaPayload = Omit<Planta, 'id' | 'caracteristicas' | 'imagenes' | 'imagen_principal' | 'proveedores' | 'created_at' | 'updated_at' | 'deleted_at'>;
 export type PlantaCreatePayload = PlantaPayload & {
   caracteristicas?: Array<Omit<PlantaCaracteristicaPayload, 'planta_id'>>;
 };
