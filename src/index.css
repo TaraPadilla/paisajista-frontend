@@ -1411,6 +1411,10 @@ button {
   max-width: 620px;
 }
 
+.catalogo-modal {
+  max-width: 620px;
+}
+
 .caracteristica-count {
   color: var(--green-2);
   font-size: 11px;
@@ -1479,6 +1483,11 @@ button {
   overflow-y: auto;
   align-content: start;
   grid-auto-rows: max-content;
+}
+
+.catalogos-table .table-head,
+.catalogos-table .table-row {
+  grid-template-columns: 72px 140px minmax(160px, .8fr) minmax(220px, 1fr) 160px;
 }
 
 .modal-overlay {

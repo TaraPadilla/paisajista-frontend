@@ -27,6 +27,7 @@ export function CaracteristicasPage() {
   const [searchOpcion, setSearchOpcion] = useState('')
   const [showCaracteristicaModal, setShowCaracteristicaModal] = useState(false)
   const [showOpcionModal, setShowOpcionModal] = useState(false)
+  const [submittingOpcion, setSubmittingOpcion] = useState(false)
   const [loading, setLoading] = useState(true)
   const [configurationError, setConfigurationError] = useState<string | null>(null)
 
@@ -121,8 +122,10 @@ export function CaracteristicasPage() {
 
   const handleCreateOpcion = async (data: Partial<CaracteristicaOpcion>) => {
     if (!selectedCaracteristica) return
+    if (submittingOpcion) return
 
     try {
+      setSubmittingOpcion(true)
       const newOpcion = await caracteristicaOpcionService.create({
         ...data,
         caracteristica_id: selectedCaracteristica.id,
@@ -143,6 +146,8 @@ export function CaracteristicasPage() {
       setShowOpcionModal(false)
     } catch (error) {
       console.error('Error creating opcion:', error)
+    } finally {
+      setSubmittingOpcion(false)
     }
   }
 
@@ -354,6 +359,7 @@ export function CaracteristicasPage() {
                 className="icon-button ghost"
                 type="button"
                 onClick={() => setShowOpcionModal(false)}
+                disabled={submittingOpcion}
               >
                 X
               </button>
@@ -370,26 +376,26 @@ export function CaracteristicasPage() {
             }}>
               <div className="form-group">
                 <label>Codigo</label>
-                <input name="codigo" required />
+                <input name="codigo" required disabled={submittingOpcion} />
               </div>
               <div className="form-group">
                 <label>Nombre</label>
-                <input name="nombre" required />
+                <input name="nombre" required disabled={submittingOpcion} />
               </div>
               <div className="form-group">
                 <label>Descripcion</label>
-                <input name="descripcion" />
+                <input name="descripcion" disabled={submittingOpcion} />
               </div>
               <div className="form-group">
                 <label>Orden</label>
-                <input name="orden" type="number" defaultValue="0" />
+                <input name="orden" type="number" defaultValue="0" disabled={submittingOpcion} />
               </div>
               <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={() => setShowOpcionModal(false)}>
+                <button type="button" className="secondary-button" onClick={() => setShowOpcionModal(false)} disabled={submittingOpcion}>
                   Cancelar
                 </button>
-                <button type="submit" className="primary-button">
-                  Guardar
+                <button type="submit" className="primary-button" disabled={submittingOpcion}>
+                  {submittingOpcion ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
             </form>
@@ -415,20 +421,29 @@ function CaracteristicaModal({
   onClose: () => void
   onSubmit: (payload: CaracteristicaPayload) => Promise<void>
 }) {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (submitting) return
 
     const formData = new FormData(event.currentTarget)
 
-    onSubmit({
-      nombre: String(formData.get('nombre') ?? '').trim(),
-      codigo: String(formData.get('codigo') ?? '').trim() || null,
-      tipo_caracteristica_id: Number(formData.get('tipo_caracteristica_id')),
-      tipo_dato_id: Number(formData.get('tipo_dato_id')),
-      tipo_campo_id: Number(formData.get('tipo_campo_id')),
-      permite_multiples: formData.get('permite_multiples') === 'true',
-      orden: parseInt(String(formData.get('orden') ?? '0')) || 0,
-    })
+    setSubmitting(true)
+
+    try {
+      await onSubmit({
+        nombre: String(formData.get('nombre') ?? '').trim(),
+        codigo: String(formData.get('codigo') ?? '').trim() || null,
+        tipo_caracteristica_id: Number(formData.get('tipo_caracteristica_id')),
+        tipo_dato_id: Number(formData.get('tipo_dato_id')),
+        tipo_campo_id: Number(formData.get('tipo_campo_id')),
+        permite_multiples: formData.get('permite_multiples') === 'true',
+        orden: parseInt(String(formData.get('orden') ?? '0')) || 0,
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -440,6 +455,7 @@ function CaracteristicaModal({
             className="icon-button ghost"
             type="button"
             onClick={onClose}
+            disabled={submitting}
           >
             X
           </button>
@@ -447,15 +463,15 @@ function CaracteristicaModal({
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Nombre</label>
-            <input name="nombre" defaultValue={caracteristica?.nombre ?? ''} required />
+            <input name="nombre" defaultValue={caracteristica?.nombre ?? ''} required disabled={submitting} />
           </div>
           <div className="form-group">
             <label>Codigo</label>
-            <input name="codigo" defaultValue={caracteristica?.codigo ?? ''} />
+            <input name="codigo" defaultValue={caracteristica?.codigo ?? ''} disabled={submitting} />
           </div>
           <div className="form-group">
             <label>Tipo de caracteristica</label>
-            <select name="tipo_caracteristica_id" defaultValue={caracteristica?.tipo_caracteristica_id ?? ''} required>
+            <select name="tipo_caracteristica_id" defaultValue={caracteristica?.tipo_caracteristica_id ?? ''} required disabled={submitting}>
               <option value="">Seleccionar</option>
               {tipoCaracteristicas.map((tipo) => (
                 <option key={tipo.id} value={tipo.id}>
@@ -467,7 +483,7 @@ function CaracteristicaModal({
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>Tipo de dato</label>
-              <select name="tipo_dato_id" defaultValue={caracteristica?.tipo_dato_id ?? ''} required>
+              <select name="tipo_dato_id" defaultValue={caracteristica?.tipo_dato_id ?? ''} required disabled={submitting}>
                 <option value="">Seleccionar</option>
                 {tipoDatos.map((tipo) => (
                   <option key={tipo.id} value={tipo.id}>
@@ -478,7 +494,7 @@ function CaracteristicaModal({
             </div>
             <div className="form-group">
               <label>Tipo de campo</label>
-              <select name="tipo_campo_id" defaultValue={caracteristica?.tipo_campo_id ?? ''} required>
+              <select name="tipo_campo_id" defaultValue={caracteristica?.tipo_campo_id ?? ''} required disabled={submitting}>
                 <option value="">Seleccionar</option>
                 {tipoCampos.map((tipo) => (
                   <option key={tipo.id} value={tipo.id}>
@@ -491,22 +507,22 @@ function CaracteristicaModal({
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>Permite multiples</label>
-              <select name="permite_multiples" defaultValue={String(Boolean(caracteristica?.permite_multiples))}>
+              <select name="permite_multiples" defaultValue={String(Boolean(caracteristica?.permite_multiples))} disabled={submitting}>
                 <option value="false">No</option>
                 <option value="true">Si</option>
               </select>
             </div>
             <div className="form-group">
               <label>Orden</label>
-              <input name="orden" type="number" defaultValue={caracteristica?.orden ?? 0} />
+              <input name="orden" type="number" defaultValue={caracteristica?.orden ?? 0} disabled={submitting} />
             </div>
           </div>
           <div className="modal-actions">
-            <button type="button" className="secondary-button" onClick={onClose}>
+            <button type="button" className="secondary-button" onClick={onClose} disabled={submitting}>
               Cancelar
             </button>
-            <button type="submit" className="primary-button">
-              Guardar
+            <button type="submit" className="primary-button" disabled={submitting}>
+              {submitting ? 'Guardando...' : 'Guardar'}
             </button>
           </div>
         </form>

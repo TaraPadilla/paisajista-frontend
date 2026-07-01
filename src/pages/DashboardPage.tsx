@@ -16,9 +16,12 @@ const plantColors: Plant['color'][] = ['green', 'violet', 'wine', 'gold', 'blue'
 const emptyValue = 'Sin definir'
 
 const getCaracteristicaValue = (planta: Planta, codigo: string): string => {
-  const match = planta.caracteristicas?.find((item) => item.caracteristica?.codigo === codigo)
+  const values = planta.caracteristicas
+    ?.filter((item) => item.caracteristica?.codigo === codigo)
+    .map((item) => item.caracteristica_opcion?.nombre || item.valor)
+    .filter((value): value is string => Boolean(value && value.trim()))
 
-  return match?.caracteristica_opcion?.nombre || match?.valor || emptyValue
+  return values && values.length > 0 ? values.join(', ') : emptyValue
 }
 
 const getPlantImageUrlByCode = (planta: Planta, code: 'cenital' | 'corte'): string | null => {

@@ -4,12 +4,14 @@ import { AppLayout } from './components/Layout/AppLayout'
 import { PlantInspector } from './components/plantas/PlantInspector'
 import { plants } from './data/mockData'
 import { useMenuItems } from './hooks/useMenuItems'
+import { CatalogosPage } from './pages/CatalogosPage'
 import { CaracteristicasPage } from './pages/CaracteristicasPage'
 import { ClientsPage } from './pages/ClientsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PlantEditorPage } from './pages/PlantEditorPage'
 import { PlantsPage } from './pages/PlantsPage'
 import { ProvidersPage } from './pages/ProvidersPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { SimpleModulePage } from './pages/SimpleModulePage'
 import type { Plant } from './types/plant'
 import type { ViewId } from './types/navigation'
@@ -95,6 +97,7 @@ const moduleContent: Record<
         title: 'Catálogos',
         body: 'Tipos de tercero, tipos de imagen, estilos, colores, estaciones y portes.',
         meta: '42 valores',
+        route: '/catalogos',
       },
       {
         title: 'Características',
@@ -139,6 +142,10 @@ const titles: Record<ViewId, { title: string; subtitle: string }> = {
   caracteristicas: {
     title: 'Características',
     subtitle: 'Gestión de campos dinámicos y sus opciones de valor.',
+  },
+  catalogos: {
+    title: 'Catálogos',
+    subtitle: 'Gestión de grupos y valores reutilizables.',
   },
 }
 
@@ -189,8 +196,9 @@ function AppContent() {
           <Route path="/clients" element={<ClientsPage searchValue={searchValue} />} />
           <Route path="/providers" element={<ProvidersPage searchValue={searchValue} />} />
           <Route path="/images" element={<SimpleModulePage title={moduleContent.images.title} description={moduleContent.images.description} cards={moduleContent.images.cards} />} />
+          <Route path="/catalogos" element={<CatalogosPage />} />
           <Route path="/caracteristicas" element={<CaracteristicasPage />} />
-          <Route path="/settings" element={<SimpleModulePage title={moduleContent.settings.title} description={moduleContent.settings.description} cards={moduleContent.settings.cards} />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
         {showInspector && (
           <PlantInspector plant={selectedPlant} isOpen={isInspectorOpen} onClose={() => setIsInspectorOpen(false)} />
