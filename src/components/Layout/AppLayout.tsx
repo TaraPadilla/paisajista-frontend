@@ -31,8 +31,6 @@ export function AppLayout({
   return (
     <div className={useSidebar ? 'app-shell with-sidebar' : 'app-shell'}>
       <AppHeader
-        title={title}
-        subtitle={subtitle}
         useSidebar={useSidebar}
         onToggleNavigation={onToggleNavigation}
         searchValue={searchValue}
