@@ -211,7 +211,7 @@ export function PlantEditorPage() {
                 submitting={submitting}
               />
             ) : loadingCaracteristicas ? (
-              <div className="empty-state inline-empty-state">Cargando características...</div>
+              <TableLoadingState title="Cargando caracteristicas" detail="Preparando campos dinamicos..." />
             ) : configurationError ? (
               <div className="form-error">{configurationError}</div>
             ) : activeGroup ? (
