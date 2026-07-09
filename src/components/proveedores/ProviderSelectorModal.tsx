@@ -6,11 +6,17 @@ const terceroService = new TerceroService()
 
 interface ProviderSelectorModalProps {
   selectedProviderId?: number | null
+  selectedProviderIds?: number[]
   onClose: () => void
   onSelect: (provider: Tercero) => void
 }
 
-export function ProviderSelectorModal({ selectedProviderId, onClose, onSelect }: ProviderSelectorModalProps) {
+export function ProviderSelectorModal({
+  selectedProviderId,
+  selectedProviderIds = [],
+  onClose,
+  onSelect,
+}: ProviderSelectorModalProps) {
   const [providers, setProviders] = useState<Tercero[]>([])
   const [searchValue, setSearchValue] = useState('')
   const [loading, setLoading] = useState(true)
@@ -76,20 +82,25 @@ export function ProviderSelectorModal({ selectedProviderId, onClose, onSelect }:
             ) : filteredProviders.length === 0 ? (
               <div className="empty-state inline-empty-state">No hay proveedores encontrados</div>
             ) : (
-              filteredProviders.map((provider) => (
-                <button
-                  className={selectedProviderId === provider.id ? 'provider-selector-row selected' : 'provider-selector-row'}
-                  key={provider.id}
-                  onClick={() => onSelect(provider)}
-                  type="button"
-                >
-                  <span>
-                    <strong>{provider.nombre}</strong>
-                    <small>{provider.codigo}</small>
-                  </span>
-                  <em>{provider.telefono || provider.email || 'Sin contacto'}</em>
-                </button>
-              ))
+              filteredProviders.map((provider) => {
+                const isSelected = selectedProviderId === provider.id || selectedProviderIds.includes(provider.id)
+
+                return (
+                  <button
+                    className={isSelected ? 'provider-selector-row selected' : 'provider-selector-row'}
+                    disabled={isSelected}
+                    key={provider.id}
+                    onClick={() => onSelect(provider)}
+                    type="button"
+                  >
+                    <span>
+                      <strong>{provider.nombre}</strong>
+                      <small>{provider.codigo}</small>
+                    </span>
+                    <em>{isSelected ? 'Agregado' : provider.telefono || provider.email || 'Sin contacto'}</em>
+                  </button>
+                )
+              })
             )}
           </div>
         </div>

@@ -36,16 +36,15 @@ const getPlantImageUrlByCode = (planta: Planta, code: 'cenital' | 'corte'): stri
   return planta.imagenes?.find((imagen) => imagen.tipo_imagen?.codigo === code)?.url ?? null
 }
 
-const getPlantProviders = (planta: Planta): string[] => {
+const getPlantProviders = (planta: Planta): Plant['providers'] => {
   return planta.proveedores
-    ?.map((proveedor) => proveedor.tercero?.nombre)
-    .filter((provider): provider is string => Boolean(provider)) ?? []
-}
-
-const getPlantBasePrice = (planta: Planta): string => {
-  const precio = planta.proveedores?.[0]?.precio
-
-  return typeof precio === 'number' ? precio.toLocaleString('es-CO') : emptyValue
+    ?.map((proveedor) => ({
+      id: proveedor.tercero_id,
+      name: proveedor.tercero?.nombre ?? `Proveedor ${proveedor.tercero_id}`,
+      code: proveedor.tercero?.codigo ?? null,
+      price: proveedor.precio,
+      observations: proveedor.observaciones,
+    })) ?? []
 }
 
 const toPlantView = (planta: Planta, index: number): Plant => ({
@@ -72,7 +71,6 @@ const toPlantView = (planta: Planta, index: number): Plant => ({
   height: emptyValue,
   canopy: emptyValue,
   providers: getPlantProviders(planta),
-  basePrice: getPlantBasePrice(planta),
   color: plantColors[index % plantColors.length],
 })
 

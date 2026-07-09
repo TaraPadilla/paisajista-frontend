@@ -50,6 +50,10 @@ const inspectorGroups = (plant: Plant) => [
   },
 ]
 
+const formatProviderPrice = (price: number) => {
+  return price.toLocaleString('es-CO')
+}
+
 export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) {
   if (!isOpen) {
     return null
@@ -57,7 +61,6 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
 
   const hasDescription = hasText(plant.type)
   const hasObservations = hasText(plant.style)
-  const providers = plant.providers.length > 0 ? plant.providers.join(', ') : emptyValue
   const availableViews = plantViews(plant).filter((view) => view.url)
 
   return (
@@ -94,17 +97,28 @@ export function PlantInspector({ plant, isOpen, onClose }: PlantInspectorProps) 
       ))}
 
       <section className="inspector-section">
-        <h3>Proveedor</h3>
-        <dl className="technical-list compact">
-          <div>
-            <dt>Proveedor</dt>
-            <dd className={providers === emptyValue ? 'is-empty' : undefined}>{providers}</dd>
+        <h3>Proveedores</h3>
+        {plant.providers.length > 0 ? (
+          <div className="inspector-provider-table">
+            <div className="inspector-provider-head">
+              <span>Proveedor</span>
+              <span>Precio</span>
+              <span>Observaciones</span>
+            </div>
+            {plant.providers.map((provider) => (
+              <div className="inspector-provider-row" key={provider.id}>
+                <span>
+                  <strong>{provider.name}</strong>
+                  <small>{provider.code ?? 'Sin codigo'}</small>
+                </span>
+                <b>{formatProviderPrice(provider.price)}</b>
+                <em>{provider.observations || emptyValue}</em>
+              </div>
+            ))}
           </div>
-          <div>
-            <dt>Precio</dt>
-            <dd className={plant.basePrice === emptyValue ? 'is-empty' : undefined}>{plant.basePrice}</dd>
-          </div>
-        </dl>
+        ) : (
+          <p className="inspector-empty-text">{emptyValue}</p>
+        )}
       </section>
 
       {(hasDescription || hasObservations) && (

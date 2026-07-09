@@ -1273,6 +1273,76 @@ button {
   margin-top: 18px;
 }
 
+.inspector-provider-table {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.inspector-provider-head,
+.inspector-provider-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 82px minmax(120px, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.inspector-provider-head {
+  background: #f6f2eb;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  padding: 8px 10px;
+  text-transform: uppercase;
+}
+
+.inspector-provider-row {
+  background: rgba(255, 253, 248, .58);
+  border-bottom: 1px solid var(--line);
+  padding: 9px 10px;
+}
+
+.inspector-provider-row:last-child {
+  border-bottom: 0;
+}
+
+.inspector-provider-row strong,
+.inspector-provider-row small {
+  display: block;
+}
+
+.inspector-provider-row strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.inspector-provider-row small,
+.inspector-provider-row em {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.inspector-provider-row b {
+  color: var(--green);
+  font-size: 12px;
+}
+
+.inspector-provider-row em {
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.inspector-empty-text {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .inspector-notes {
   display: grid;
   gap: 8px;
@@ -1921,6 +1991,31 @@ button {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.plant-provider-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.plant-provider-row {
+  align-items: end;
+  background: rgba(255, 253, 248, .72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(160px, 1fr) minmax(120px, .7fr) minmax(180px, 1fr) auto;
+  padding: 12px;
+}
+
+.compact-form-group {
+  margin: 0;
+}
+
+.plant-provider-remove {
+  min-height: 38px;
 }
 
 .plant-editor-preview {

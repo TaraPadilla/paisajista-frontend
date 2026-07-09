@@ -21,7 +21,12 @@ export interface Plant {
   bloom: string
   height: string
   canopy: string
-  providers: string[]
-  basePrice: string
+  providers: Array<{
+    id: number
+    name: string
+    code: string | null
+    price: number
+    observations: string | null
+  }>
   color: 'violet' | 'wine' | 'gold' | 'blue' | 'green'
 }

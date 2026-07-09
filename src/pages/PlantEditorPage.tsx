@@ -19,7 +19,8 @@ type FieldValue = string | string[]
 type PlantImageCode = 'cenital' | 'corte'
 type PlantImageFiles = Record<PlantImageCode, File | null>
 type PlantImagePreviews = Record<PlantImageCode, string | null>
-type PlantProviderValue = Omit<PlantaProveedorPayload, 'planta_id'> & {
+type PlantProviderValue = Omit<Omit<PlantaProveedorPayload, 'planta_id'>, 'precio'> & {
+  precio: number | ''
   tercero?: PlantaProveedor['tercero'] | null
 }
 
@@ -43,7 +44,7 @@ export function PlantEditorPage() {
     observaciones: null,
   })
   const [fieldValues, setFieldValues] = useState<Record<number, FieldValue>>({})
-  const [providerValue, setProviderValue] = useState<PlantProviderValue | null>(null)
+  const [providerValues, setProviderValues] = useState<PlantProviderValue[]>([])
   const [showProviderSelector, setShowProviderSelector] = useState(false)
   const [imageFiles, setImageFiles] = useState<PlantImageFiles>({ cenital: null, corte: null })
   const [currentImages, setCurrentImages] = useState<PlantaImagen[]>([])
@@ -79,7 +80,7 @@ export function PlantEditorPage() {
           observaciones: planta.observaciones,
         })
         setFieldValues(toFieldValues(planta.caracteristicas ?? [], caracteristicas))
-        setProviderValue(toProviderValue(planta.proveedores?.[0] ?? null))
+        setProviderValues(toProviderValues(planta.proveedores ?? []))
         setCurrentImages(planta.imagenes ?? [])
       } catch (error) {
         setConfigurationError(error instanceof Error ? error.message : 'No se pudo cargar la planta.')
@@ -137,7 +138,7 @@ export function PlantEditorPage() {
       const payload = {
         ...normalizePlantaPayload(baseValues),
         caracteristicas: caracteristicaValues,
-        proveedores: providerValue ? [normalizeProviderValue(providerValue)] : [],
+        proveedores: providerValues.map(normalizeProviderValue),
       }
       const formData = buildPlantaFormData(payload, imageFiles)
 
@@ -206,8 +207,8 @@ export function PlantEditorPage() {
                 onChange={setBaseValues}
                 onImageChange={setImageFiles}
                 onOpenProviderSelector={() => setShowProviderSelector(true)}
-                onProviderChange={setProviderValue}
-                providerValue={providerValue}
+                onProviderChange={setProviderValues}
+                providerValues={providerValues}
                 submitting={submitting}
               />
             ) : loadingCaracteristicas ? (
@@ -259,19 +260,28 @@ export function PlantEditorPage() {
       </form>
       {showProviderSelector && (
         <ProviderSelectorModal
-          selectedProviderId={providerValue?.tercero_id ?? null}
+          selectedProviderIds={providerValues.map((provider) => provider.tercero_id)}
           onClose={() => setShowProviderSelector(false)}
           onSelect={(provider) => {
-            setProviderValue((current) => ({
-              tercero_id: provider.id,
-              tercero: {
-                id: provider.id,
-                codigo: provider.codigo,
-                nombre: provider.nombre,
-              },
-              precio: current?.precio ?? 0,
-              observaciones: current?.observaciones ?? null,
-            }))
+            setProviderValues((current) => {
+              if (current.some((currentProvider) => currentProvider.tercero_id === provider.id)) {
+                return current
+              }
+
+              return [
+                ...current,
+                {
+                  tercero_id: provider.id,
+                  tercero: {
+                    id: provider.id,
+                    codigo: provider.codigo,
+                    nombre: provider.nombre,
+                  },
+                  precio: 0,
+                  observaciones: null,
+                },
+              ]
+            })
             setShowProviderSelector(false)
           }}
         />
@@ -289,7 +299,7 @@ function IdentitySection({
   onImageChange,
   onOpenProviderSelector,
   onProviderChange,
-  providerValue,
+  providerValues,
   submitting,
 }: {
   baseValues: PlantaPayload
@@ -299,10 +309,23 @@ function IdentitySection({
   onChange: (values: PlantaPayload) => void
   onImageChange: (values: PlantImageFiles) => void
   onOpenProviderSelector: () => void
-  onProviderChange: (value: PlantProviderValue | null) => void
-  providerValue: PlantProviderValue | null
+  onProviderChange: (values: PlantProviderValue[]) => void
+  providerValues: PlantProviderValue[]
   submitting: boolean
 }) {
+  const updateProvider = (terceroId: number, nextValue: Partial<PlantProviderValue>) => {
+    onProviderChange(
+      providerValues.map((provider) =>
+        provider.tercero_id === terceroId
+          ? {
+              ...provider,
+              ...nextValue,
+            }
+          : provider,
+      ),
+    )
+  }
+
   return (
     <>
       <div className="plant-editor-section-title">
@@ -347,55 +370,60 @@ function IdentitySection({
         />
       </div>
       <div className="plant-editor-section-title compact-title">
-        <span>Proveedor</span>
-        <h3>Proveedor asociado</h3>
+        <span>Proveedores</span>
+        <h3>Proveedores asociados</h3>
       </div>
       <div className="plant-provider-field">
         <div className="plant-provider-summary">
-          {providerValue?.tercero ? (
-            <>
-              <strong>{providerValue.tercero.nombre}</strong>
-              <small>{providerValue.tercero.codigo}</small>
-            </>
-          ) : (
-            <>
-              <strong>Sin proveedor seleccionado</strong>
-              <small>Busca y selecciona un proveedor registrado</small>
-            </>
-          )}
+          <strong>{providerValues.length > 0 ? `${providerValues.length} proveedor(es) seleccionados` : 'Sin proveedores seleccionados'}</strong>
+          <small>Busca y agrega proveedores registrados</small>
         </div>
         <div className="plant-provider-actions">
           <button className="secondary-button" type="button" onClick={onOpenProviderSelector} disabled={submitting}>
-            Buscar proveedor
+            Agregar proveedor
           </button>
-          {providerValue && (
-            <button className="danger-action" type="button" onClick={() => onProviderChange(null)} disabled={submitting}>
-              Quitar
-            </button>
-          )}
         </div>
       </div>
-      {providerValue && (
-        <div className="form-grid two-columns">
-          <div className="form-group">
-            <label>Precio proveedor</label>
-            <input
-              disabled={submitting}
-              min="0"
-              onChange={(event) => onProviderChange({ ...providerValue, precio: Number(event.target.value) || 0 })}
-              step="0.01"
-              type="number"
-              value={providerValue.precio}
-            />
-          </div>
-          <div className="form-group">
-            <label>Observaciones proveedor</label>
-            <input
-              disabled={submitting}
-              onChange={(event) => onProviderChange({ ...providerValue, observaciones: event.target.value || null })}
-              value={providerValue.observaciones ?? ''}
-            />
-          </div>
+      {providerValues.length > 0 && (
+        <div className="plant-provider-list">
+          {providerValues.map((provider) => (
+            <div className="plant-provider-row" key={provider.tercero_id}>
+              <div className="plant-provider-summary">
+                <strong>{provider.tercero?.nombre ?? 'Proveedor seleccionado'}</strong>
+                <small>{provider.tercero?.codigo ?? `ID ${provider.tercero_id}`}</small>
+              </div>
+              <div className="form-group compact-form-group">
+                <label>Precio</label>
+                <input
+                  disabled={submitting}
+                  min="0"
+                  onChange={(event) => {
+                    const nextPrice = event.target.value === '' ? '' : Number(event.target.value)
+                    updateProvider(provider.tercero_id, { precio: nextPrice })
+                  }}
+                  step="0.01"
+                  type="number"
+                  value={provider.precio}
+                />
+              </div>
+              <div className="form-group compact-form-group">
+                <label>Observaciones</label>
+                <input
+                  disabled={submitting}
+                  onChange={(event) => updateProvider(provider.tercero_id, { observaciones: event.target.value || null })}
+                  value={provider.observaciones ?? ''}
+                />
+              </div>
+              <button
+                className="danger-action plant-provider-remove"
+                disabled={submitting}
+                onClick={() => onProviderChange(providerValues.filter((currentProvider) => currentProvider.tercero_id !== provider.tercero_id))}
+                type="button"
+              >
+                Quitar
+              </button>
+            </div>
+          ))}
         </div>
       )}
       <div className="plant-editor-section-title compact-title">
@@ -656,22 +684,18 @@ function buildPlantaFormData(
 function normalizeProviderValue(value: PlantProviderValue): Omit<PlantaProveedorPayload, 'planta_id'> {
   return {
     tercero_id: value.tercero_id,
-    precio: value.precio,
+    precio: value.precio === '' ? 0 : value.precio,
     observaciones: value.observaciones?.trim() || null,
   }
 }
 
-function toProviderValue(provider: PlantaProveedor | null): PlantProviderValue | null {
-  if (!provider) {
-    return null
-  }
-
-  return {
+function toProviderValues(providers: PlantaProveedor[]): PlantProviderValue[] {
+  return providers.map((provider) => ({
     tercero_id: provider.tercero_id,
     tercero: provider.tercero,
     precio: provider.precio,
     observaciones: provider.observaciones,
-  }
+  }))
 }
 
 function getImageByCode(images: PlantaImagen[], code: PlantImageCode): PlantaImagen | undefined {
