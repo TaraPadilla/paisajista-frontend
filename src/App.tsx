@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
 import { PlantInspector } from './components/plantas/PlantInspector'
-import { plants } from './data/mockData'
 import { useMenuItems } from './hooks/useMenuItems'
 import { CatalogosPage } from './pages/CatalogosPage'
 import { CaracteristicasPage } from './pages/CaracteristicasPage'
@@ -17,6 +16,33 @@ import type { Plant } from './types/plant'
 import type { ViewId } from './types/navigation'
 
 type SimpleModuleView = 'clients' | 'providers' | 'images' | 'settings'
+
+const emptySelectedPlant: Plant = {
+  id: 0,
+  scientificName: '',
+  commonName: '',
+  sunlight: '',
+  water: '',
+  soil: '',
+  coldResistance: '',
+  plantType: '',
+  foliageType: '',
+  maxHeight: '',
+  canopyDiameter: '',
+  landscapeStyle: '',
+  predominantColor: '',
+  floweringSeason: '',
+  imageUrl: null,
+  cenitalImageUrl: null,
+  corteImageUrl: null,
+  style: '',
+  type: '',
+  bloom: '',
+  height: '',
+  canopy: '',
+  providers: [],
+  color: 'green',
+}
 
 const moduleContent: Record<
   SimpleModuleView,
@@ -153,7 +179,7 @@ function AppContent() {
   const menuItems = useMenuItems()
   const [useSidebar, setUseSidebar] = useState(true)
   const [searchValue, setSearchValue] = useState('')
-  const [selectedPlant, setSelectedPlant] = useState<Plant>({ ...plants[1], id: 0 })
+  const [selectedPlant, setSelectedPlant] = useState<Plant>(emptySelectedPlant)
   const [isInspectorOpen, setIsInspectorOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
