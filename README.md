@@ -29,7 +29,7 @@ Abre `http://localhost:5173/` o la URL que indique Vite. Pulsa **Ingresar** y us
 
 La landing no consulta la sesión. Si abres una pantalla privada sin sesión, la aplicación te envía a `/login`. Si abres el login con una sesión activa, te lleva a `/dashboard`. El ícono de salida del encabezado se desactiva durante el cierre y, al confirmarse, la aplicación vuelve a `/login`.
 
-La [landing comercial](../Landing/README.md) vive en la carpeta hermana `Landing/`. Vite compila sus componentes y recursos junto con el frontend. Conserva ambas carpetas en el checkout de compilación.
+La [landing comercial](../Landing/README.md) vive en la carpeta hermana `Landing/`. Vite compila sus componentes y recursos junto con el frontend. Conserva ambas carpetas en el checkout de compilación. GSAP y ScrollTrigger se instalan con las dependencias del frontend y se cargan al montar la landing.
 
 El interruptor de tema está en el login y en el encabezado privado. La paleta se aplica a todo el documento, incluida la landing. Al principio sigue la preferencia del sistema. Después de elegir un tema, el navegador lo guarda en `localStorage` bajo la clave `paisajista-theme`.
 

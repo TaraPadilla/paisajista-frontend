@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    dedupe: ['react', 'react-dom', 'react-router-dom'],
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'gsap'],
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

@@ -22,7 +22,9 @@
       "@/*": ["./src/*"],
       "react": ["./node_modules/@types/react"],
       "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],
-      "react-router-dom": ["./node_modules/react-router-dom"]
+      "react-router-dom": ["./node_modules/react-router-dom"],
+      "gsap": ["./node_modules/gsap"],
+      "gsap/*": ["./node_modules/gsap/*"]
     },
 
     /* Linting */
