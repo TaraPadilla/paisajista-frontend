@@ -1,6 +1,10 @@
 import { Icon } from './Icon'
+import { ThemeSwitch } from '../shared/ThemeSwitch'
 
 interface AppHeaderProps {
+  userName: string
+  onLogout: () => void
+  loggingOut: boolean
   useSidebar: boolean
   onToggleNavigation: () => void
   searchValue: string
@@ -8,6 +12,9 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
+  userName,
+  onLogout,
+  loggingOut,
   useSidebar,
   onToggleNavigation,
   searchValue,
@@ -35,6 +42,7 @@ export function AppHeader({
       </label>
 
       <div className="header-actions">
+        <ThemeSwitch />
         <button
           className="icon-button nav-toggle-button"
           type="button"
@@ -45,12 +53,20 @@ export function AppHeader({
           <Icon name="layout" />
         </button>
         <div className="user-chip">
-          <span>GP</span>
-          <div>
-            <strong>Geronimo Parilla</strong>
-            <small>Paisajista</small>
-          </div>
+          <span>{userName.slice(0, 2).toUpperCase()}</span>
+          <strong>{userName}</strong>
         </div>
+        <button
+          className="icon-button logout-button"
+          type="button"
+          onClick={onLogout}
+          disabled={loggingOut}
+          aria-busy={loggingOut}
+          aria-label={loggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}
+          title={loggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}
+        >
+          <Icon name="logout" />
+        </button>
       </div>
     </header>
   )

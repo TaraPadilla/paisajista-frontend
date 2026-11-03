@@ -5,7 +5,14 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    fs: { allow: ['.', '../Landing'] },
+    proxy: {
+      '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+    },
+  },
   resolve: {
+    dedupe: ['react', 'react-dom', 'react-router-dom'],
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

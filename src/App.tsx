@@ -1,5 +1,9 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { isAxiosError } from 'axios'
+import { getSessionUser, refreshCsrfToken, signOut } from '../services/api/SessionService'
+import { LoginPage } from './pages/LoginPage'
+import { LandingPage } from '../../Landing/LandingPage'
+import { BrowserRouter, Navigate, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
 import { PlantInspector } from './components/plantas/PlantInspector'
 import { useMenuItems } from './hooks/useMenuItems'
@@ -175,7 +179,11 @@ const titles: Record<ViewId, { title: string; subtitle: string }> = {
   },
 }
 
-function AppContent() {
+function AppContent({ userName, onLogout, loggingOut }: {
+  userName: string
+  onLogout: () => void
+  loggingOut: boolean
+}) {
   const menuItems = useMenuItems()
   const [useSidebar, setUseSidebar] = useState(true)
   const [searchValue, setSearchValue] = useState('')
@@ -186,7 +194,7 @@ function AppContent() {
 
   const currentPath = location.pathname.replace('/', '') || 'dashboard'
   const currentRootPath = currentPath.split('/')[0] || 'dashboard'
-  const activeView = currentRootPath as ViewId
+  const activeView = Object.hasOwn(titles, currentRootPath) ? currentRootPath as ViewId : 'dashboard'
   const isPlantEditor = currentPath === 'plants/new' || /^plants\/\d+\/edit$/.test(currentPath)
 
   const handleSelectPlant = (plant: Plant) => {
@@ -202,6 +210,9 @@ function AppContent() {
 
   return (
     <AppLayout
+      userName={userName}
+      onLogout={onLogout}
+      loggingOut={loggingOut}
       activeView={activeView}
       title={isPlantEditor ? (currentPath === 'plants/new' ? 'Nueva planta' : 'Editar planta') : titles[activeView].title}
       subtitle={isPlantEditor ? 'Editor de ficha técnica botánica.' : titles[activeView].subtitle}
@@ -217,7 +228,7 @@ function AppContent() {
     >
       <div className={showInspector && isInspectorOpen ? 'workspace with-inspector' : 'workspace'}>
         <Routes>
-          <Route path="/" element={<DashboardPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants" element={<PlantsPage selectedPlant={selectedPlant} searchValue={searchValue} onSelectPlant={handleSelectPlant} />} />
           <Route path="/plants/new" element={<PlantEditorPage />} />
@@ -237,10 +248,59 @@ function AppContent() {
   )
 }
 
+function SessionGate() {
+  const location = useLocation()
+  const [user, setUser] = useState<{ name: string } | null>(null)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [logoutError, setLogoutError] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  useEffect(() => {
+    refreshCsrfToken().then(getSessionUser).then(setUser).catch((error) => {
+      if (!isAxiosError(error) || error.response?.status !== 401) {
+        setStatus('error')
+      }
+    }).finally(() => setStatus((current) => current === 'loading' ? 'ready' : current))
+  }, [])
+
+  if (status === 'loading') return <main className="login-screen" role="status">Cargando sesión…</main>
+  if (status === 'error') return <main className="login-screen">
+    <p role="alert">No se pudo conectar con el servidor.</p>
+    <button className="primary-button" onClick={() => window.location.reload()}>Reintentar</button>
+  </main>
+  if (!user) return location.pathname === '/login'
+    ? <LoginPage onLogin={setUser} />
+    : <Navigate to="/login" replace />
+  if (location.pathname === '/login') return <Navigate to="/dashboard" replace />
+
+  async function logout() {
+    if (loggingOut) return
+    setLoggingOut(true)
+    setLogoutError(false)
+    try {
+      await signOut()
+      setUser(null)
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 401) setUser(null)
+      else setLogoutError(true)
+    } finally {
+      setLoggingOut(false)
+    }
+  }
+
+  return <>
+    {logoutError && <p className="form-error" role="alert">No se pudo cerrar la sesión. Intenta de nuevo.</p>}
+    <AppContent userName={user.name} onLogout={logout} loggingOut={loggingOut} />
+  </>
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<SessionGate />} />
+      </Routes>
     </BrowserRouter>
   )
 }

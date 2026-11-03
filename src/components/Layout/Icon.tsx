@@ -7,6 +7,12 @@ interface IconProps {
 
 export function Icon({ name, className = 'icon' }: IconProps) {
   const paths: Record<string, ReactNode> = {
+    logout: (
+      <>
+        <path d="M10 17v3H4V4h6v3" />
+        <path d="M9 12h12m-4-4 4 4-4 4" />
+      </>
+    ),
     home: (
       <>
         <path d="m3 11 9-8 9 8" />

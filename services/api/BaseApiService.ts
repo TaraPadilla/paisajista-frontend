@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import { toast } from '@/hooks/use-toast';
+import { getCsrfToken } from './SessionService';
 
 interface ApiEnvelope<T> {
   message?: string;
@@ -11,7 +12,7 @@ export class BaseApiService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_BACKEND_URL;
+    this.baseURL = '/api';
     // console.log(this.baseURL);
     this.api = axios.create({
       baseURL: this.baseURL,
@@ -23,9 +24,9 @@ export class BaseApiService {
 
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = getCsrfToken();
         if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers['X-CSRF-TOKEN'] = token;
         }
         return config;
       },

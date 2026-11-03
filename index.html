@@ -1,10 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        const theme = localStorage.getItem('paisajista-theme')
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
+      } catch {
+        // Follow the system theme when storage is unavailable.
+      }
+    </script>
     <title>El Paisajista</title>
+    <meta name="description" content="El Paisajista, estudio de diseño de jardines y espacios verdes de Gerónimo Parrilla." />
   </head>
   <body>
     <div id="root"></div>

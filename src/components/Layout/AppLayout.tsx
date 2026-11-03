@@ -4,6 +4,9 @@ import { AppHeader } from './AppHeader'
 import { Sidebar } from './Sidebar'
 
 interface AppLayoutProps {
+  userName: string
+  onLogout: () => void
+  loggingOut: boolean
   activeView: ViewId
   title: string
   subtitle: string
@@ -17,6 +20,9 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({
+  userName,
+  onLogout,
+  loggingOut,
   activeView,
   title,
   subtitle,
@@ -31,6 +37,9 @@ export function AppLayout({
   return (
     <div className={useSidebar ? 'app-shell with-sidebar' : 'app-shell'}>
       <AppHeader
+        userName={userName}
+        onLogout={onLogout}
+        loggingOut={loggingOut}
         useSidebar={useSidebar}
         onToggleNavigation={onToggleNavigation}
         searchValue={searchValue}
