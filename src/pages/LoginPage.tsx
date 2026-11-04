@@ -44,15 +44,13 @@ export function LoginPage({ onLogin }: { onLogin: (user: { name: string }) => vo
         <button className="primary-button" disabled={busy} type="submit">
           {busy ? 'Ingresando…' : 'Ingresar'}
         </button>
-        {import.meta.env.DEV && (
-          <aside aria-label="Cuenta de prueba">
-            <small>
-              Cuenta de prueba<br />
-              Correo: <code>test@example.com</code><br />
-              Contraseña: <code>password</code>
-            </small>
-          </aside>
-        )}
+        <aside aria-label="Cuenta de prueba">
+          <small>
+            Cuenta de prueba<br />
+            Correo: <code>test@example.com</code><br />
+            Contraseña: <code>password</code>
+          </small>
+        </aside>
       </form>
     </main>
   )

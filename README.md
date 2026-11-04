@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abre `http://localhost:5173/` o la URL que indique Vite. Pulsa **Ingresar** y usa una cuenta existente de Laravel. En desarrollo, el formulario muestra la cuenta de prueba `test@example.com` con contraseña `password`, que debe estar creada por el seeder del backend. `.env.development` define `VITE_BACKEND_URL=/api`. Vite reenvía esa ruta al backend local mediante `vite.config.ts`.
+Abre `http://localhost:5173/` o la URL que indique Vite. Pulsa **Ingresar** y usa una cuenta existente de Laravel. Durante la aprobación del cliente, el formulario muestra `test@example.com` con contraseña `password` también en producción. La nota es pública y la cuenta debe existir en Laravel. El seeder solo la crea en local o testing. `.env.development` define `VITE_BACKEND_URL=/api`. Vite reenvía esa ruta al backend local mediante `vite.config.ts`.
 
 ## Pantallas y flujos
 
