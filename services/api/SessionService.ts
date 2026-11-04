@@ -1,12 +1,16 @@
 import axios from 'axios'
+import { apiConfig } from './apiConfig'
 
-const api = axios.create({ baseURL: '/api', headers: { Accept: 'application/json' } })
+const api = axios.create(apiConfig)
 let csrfToken = ''
 
 export const getCsrfToken = () => csrfToken
 
 export async function refreshCsrfToken() {
   const { data } = await api.get<{ token: string }>('/csrf-token')
+  if (typeof data?.token !== 'string' || !data.token) {
+    throw new Error('La API no devolvió un token CSRF válido.')
+  }
   csrfToken = data.token
 }
 

@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 import { toast } from '@/hooks/use-toast';
 import { getCsrfToken } from './SessionService';
+import { apiConfig } from './apiConfig';
 
 interface ApiEnvelope<T> {
   message?: string;
@@ -9,23 +10,14 @@ interface ApiEnvelope<T> {
 
 export class BaseApiService {
   private api: AxiosInstance;
-  private baseURL: string;
 
   constructor() {
-    this.baseURL = '/api';
-    // console.log(this.baseURL);
-    this.api = axios.create({
-      baseURL: this.baseURL,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
+    this.api = axios.create(apiConfig);
 
     this.api.interceptors.request.use(
       (config) => {
         const token = getCsrfToken();
-        if (token && config.headers) {
+        if (token && ['post', 'put', 'patch', 'delete'].includes(config.method ?? '')) {
           config.headers['X-CSRF-TOKEN'] = token;
         }
         return config;

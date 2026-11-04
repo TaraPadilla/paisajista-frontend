@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abre `http://localhost:5173/` o la URL que indique Vite. Pulsa **Ingresar** y usa una cuenta existente de Laravel. En desarrollo, el formulario muestra la cuenta de prueba `test@example.com` con contraseña `password`, que debe estar creada por el seeder del backend. Vite reenvía `/api` al backend local mediante `vite.config.ts`. Los servicios usan la ruta relativa `/api`. La variable anterior `VITE_BACKEND_URL` no controla esta conexión.
+Abre `http://localhost:5173/` o la URL que indique Vite. Pulsa **Ingresar** y usa una cuenta existente de Laravel. En desarrollo, el formulario muestra la cuenta de prueba `test@example.com` con contraseña `password`, que debe estar creada por el seeder del backend. `.env.development` define `VITE_BACKEND_URL=/api`. Vite reenvía esa ruta al backend local mediante `vite.config.ts`.
 
 ## Pantallas y flujos
 
@@ -47,6 +47,8 @@ npm run lint
 npm run build
 ```
 
-`npm run build` comprueba TypeScript y genera `dist/`. Sirve ese directorio por HTTPS y configura el fallback de la SPA a `index.html` para rutas como `/login` y `/plants/1/edit`. Antes del fallback, reenvía `/api/*` a Laravel bajo el mismo origen y preserva las cookies. Enruta también `/storage/*` si las URLs públicas de imágenes usan ese origen. El proxy de Vite solo configura el servidor de desarrollo.
+`npm run build` comprueba TypeScript y genera `dist/`. El modo de producción lee `VITE_BACKEND_URL=https://backend.elpaisajista.com/api` de `.env.production`. El valor se incorpora al compilar. Si cambia, genera un nuevo build. Revisa también que el entorno de compilación y `.env.production.local` no lo sobrescriban.
+
+Publica el contenido de `dist/`, incluido el `.htaccess` que mantiene el fallback de la SPA para `/login` y `/dashboard`, en el document root HTTPS de `elpaisajista.com`. Axios consulta directamente el subdominio Laravel con credenciales y usa el token del JSON de `/api/csrf-token` en `X-CSRF-TOKEN`. Las imágenes usan las URLs absolutas que entrega Laravel. Consulta la [configuración del backend](../Backend/README.md) para preparar CORS y las cookies antes de publicar el frontend.
 
 Si falla el login en local, comprueba que el backend responde en el puerto 8000 y que `/api/csrf-token` devuelve JSON y establece la cookie de sesión. Un `419` apunta a un token desactualizado o a que la cookie no vuelve al servidor. Si las fichas cargan pero las imágenes no, revisa la URL generada por Laravel y su enlace `public/storage`.
